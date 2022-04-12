@@ -1,6 +1,4 @@
-import os, time, datetime
-from datetime import now
-
-os.system('clear')
-lo = datetime.now() 
-print(lo)
+import time
+start_time = time.time()
+main()
+print("--- %s seconds ---" % (time.time() - start_time))
