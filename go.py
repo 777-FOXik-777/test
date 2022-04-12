@@ -1,4 +1,5 @@
 import os, time, datetime
 
 os.system('clear')
-datetime.now() 
+lo = datetime.now() 
+print(lo)
