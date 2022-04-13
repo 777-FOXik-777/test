@@ -269,8 +269,7 @@ login_user
 increase_followers
 
 elif [[ $option -eq 3 ]]; then
-printf "\n Lol"
-menu
+get_saved()
 
 
 elif [[ $option -eq 2 ]]; then
