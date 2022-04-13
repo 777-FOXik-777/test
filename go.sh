@@ -232,9 +232,9 @@ printf " \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Пытаюсь от�
 check_unfollow=$(curl -s -L -b cookie.$user -d "ig_sig_key_version=4&signed_body=$hmac.$data" -s --user-agent 'User-Agent: "Instagram 10.26.0 Android (18/4.3; 320dpi; 720x1280; Xiaomi; HM 1SW; armani; qcom; en_US)"' -w "\n%{http_code}\n" -H "$header" "https://i.instagram.com/api/v1/friendships/destroy/$celeb/" | grep -o '"following": false' )
 
 if [[ $check_unfollow == "a" ]]; then
-printf "\n \e[1;93m [!] Error, stoping to prevent blocking\n"
-printf " \e[1;33m [-] You reached today's limit. Try tomorrow again.\n"
-printf " \e[1;33m [-] We have set limit for prevent blockage of your instagram account.\n"
+printf "\n \e[1;93m [!] Ошибка, остановка для предотвращения блокировки\n"
+printf " \e[1;33m [-] Вы достигли сегодняшнего лимита. Попробуйте завтра снова.\n"
+printf " \e[1;33m [-] Мы установили ограничение для предотвращения блокировки вашей учетной записи Instagram.\n"
 exit 1
 else
 printf " \e[1;92mУспех\e[0m\n"
