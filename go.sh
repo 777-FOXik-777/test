@@ -256,8 +256,8 @@ done
 
 menu() {
 
-printf " \e[1;93mМеню:"
 printf "\n"
+printf " \e[1;31m[\e[0m\e[1;77m@\e[0m\e[1;31m]\e[0m\e[1;93m Меню:\n"
 printf " \e[1;31m[\e[0m\e[1;77m1\e[0m\e[1;31m]\e[0m\e[1;93m Увеличение подписчиков\e[0m\n"
 printf " \e[1;31m[\e[0m\e[1;77m2\e[0m\e[1;31m]\e[0m\e[1;93m как это работает?\e[0m\n"
 printf " \e[1;31m[\e[0m\e[1;77m3\e[0m\e[1;31m]\e[0m\e[1;93m Выход\e[0m\n"
