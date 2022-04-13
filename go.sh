@@ -207,13 +207,13 @@ printf " \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Попытка по�
 check_follow=$(curl -s -L -b cookie.$user -d "ig_sig_key_version=4&signed_body=$hmac.$data" -s --user-agent 'User-Agent: "Instagram 10.26.0 Android (18/4.3; 320dpi; 720x1280; Xiaomi; HM 1SW; armani; qcom; en_US)"' -w "\n%{http_code}\n" -H "$header" "https://i.instagram.com/api/v1/friendships/create/$celeb/" | grep -o '"following": true')
 
 if [[ $check_follow == "a" ]]; then
-printf " \n\e[1;31m [!] Error\n"
-printf " \n\e[1;33m [::] There is problem in you instagram account\n"
-printf " \n\e[1;31m [:] Reason\n"
-printf " \n\e[1;33m - You have reached today's following/unfollowing limit of instagram\n."
-printf " \n\e[1;33m - You account is temporary banned by instagram\n"
-printf " \n\e[1;32m [:] Solution\n"
-printf " \n\e[1;33m - Don't follw or unfollow any in instagram for 24 hour then run script again it will work.\n"
+printf " \n\e[1;31m [!] Ошибка\n"
+printf " \n\e[1;33m [::] Проблема в вашем аккаунте в инстаграм\n"
+printf " \n\e[1;31m [:] Причина\n"
+printf " \n\e[1;33m - Вы достигли сегодняшнего лимита подписок/отписок в Instagram\n."
+printf " \n\e[1;33m - Ваш аккаунт временно заблокирован инстаграмом\n"
+printf " \n\e[1;32m [:] Решение\n"
+printf " \n\e[1;33m - Не подписывайтесь и не отписывайтесь ни от кого в instagram в течение 24 часов, затем снова запустите скрипт, он сработает.\n"
 
 exit 1
 else
