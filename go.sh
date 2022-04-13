@@ -260,8 +260,7 @@ printf "\n"
 printf " \e[1;31m[\e[0m\e[1;77m@\e[0m\e[1;31m]\e[0m\e[1;93m Меню:\n"
 printf "\n"
 printf " \e[1;31m[\e[0m\e[1;77m1\e[0m\e[1;31m]\e[0m\e[1;93m Увеличение подписчиков\e[0m\n"
-printf " \e[1;31m[\e[0m\e[1;77m2\e[0m\e[1;31m]\e[0m\e[1;93m как это работает?\e[0m\n"
-printf " \e[1;31m[\e[0m\e[1;77m3\e[0m\e[1;31m]\e[0m\e[1;93m Выход\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m2\e[0m\e[1;31m]\e[0m\e[1;93m Выход\e[0m\n"
 printf "\n"
 
 
@@ -271,22 +270,12 @@ if [[ $option -eq 1 ]]; then
 login_user
 increase_followers
 
-elif [[ $option -eq 3 ]]; then
+elif [[ $option -eq 2 ]]; then
 printf "\n"
 printf "  \e[1;91m До встречи !!\e[0m\n"
 printf "\n"
 exit
 
-elif [[ $option -eq 2 ]]; then
-printf "\n"
-printf " \e[1;92m на самомо деле все устроено очень легко,\n"
-printf " \e[1;92m когда вы подписывается на звезду то вы\n"
-printf " \e[1;92m появляется самым первым в списке подписчиков\n"
-printf " \e[1;92m именно поэтому люди на вас подписиваются\n"
-printf " \e[1;92m а чтобы было удобней инструмент подписиваеться\n"
-printf " \e[1;92m и описывается от звезды чтобы всегда быть первым\n"
-sleep 5
-menu
 
 else
 
