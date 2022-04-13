@@ -37,7 +37,7 @@ login_user() {
 if [[ $user == "" ]]; then
 printf "\n"
 printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Login\e[0m\n"
-read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Username: \e[0m' user
+read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Имя пользователя: \e[0m' user
 fi
 
 
