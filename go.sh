@@ -242,7 +242,7 @@ fi
 
 sleep 3
 done
-printf " \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;77m Sleeping 60 secs for block prevention...\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;77m Сон на 60 секунд для предотвращения блокировки...\e[0m\n"
 sleep 60
 
 
@@ -254,12 +254,12 @@ done
 menu() {
 
 printf "\n"
-printf " \e[1;31m[\e[0m\e[1;77m01\e[0m\e[1;31m]\e[0m\e[1;93m Increase Followers\e[0m\n"
-printf " \e[1;31m[\e[0m\e[1;77m02\e[0m\e[1;31m]\e[0m\e[1;93m Exit\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m01\e[0m\e[1;31m]\e[0m\e[1;93m Увеличение подписчиков\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m02\e[0m\e[1;31m]\e[0m\e[1;93m Выход\e[0m\n"
 printf "\n"
 
 
-read -p $' \e[1;31m[\e[0m\e[1;77m::\e[0m\e[1;31m]\e[0m\e[1;77m Choose an option: \e[0m' option
+read -p $' \e[1;31m[\e[0m\e[1;77m::\e[0m\e[1;31m]\e[0m\e[1;77m Выберите опцию: \e[0m' option
 
 if [[ $option -eq 1 ]]; then
 login_user
@@ -267,13 +267,13 @@ increase_followers
 
 elif [[ $option -eq 2 ]]; then
 printf "\n"
-printf "  \e[1;91mBye Bye !!\e[0m\n"
+printf "  \e[1;91mBye Пока !!\e[0m\n"
 printf "\n"
 exit
 
 else
 
-printf " \e[1;93m[!] Invalid Option!\e[0m\n"
+printf " \e[1;93m[!] Не могу найти опцию!\e[0m\n"
 sleep 2
 menu
 
