@@ -40,23 +40,23 @@ login_user() {
 
 if [[ $user == "" ]]; then
 printf "\n"
-printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Регистрация\e[0m\n"
-read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Имя пользователя: \e[0m' user
+printf " \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Регистрация\e[0m\n"
+read -p $' \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Имя пользователя: \e[0m' user
 fi
 
 
 if [[ -e cookie.$user ]]; then
 
-printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Файлы cookie, найденные для пользователя\e[0m\e[1;77m %s\e[0m\n" $user
+printf " \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Файлы cookie, найденные для пользователя\e[0m\e[1;77m %s\e[0m\n" $user
 
 default_use_cookie="Y"
 
-read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Использовать их?\e[0m\e[1;77m [Y/n]\e[0m ' use_cookie
+read -p $' \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Использовать их?\e[0m\e[1;77m [Y/n]\e[0m ' use_cookie
 
 use_cookie="${use_cookie:-${default_use_cookie}}"
 
 if [[ $use_cookie == *'Y'* || $use_cookie == *'y'* ]]; then
-printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Использование сохраненных учетных данных...\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Использование сохраненных учетных данных...\e[0m\n"
 else
 rm -rf cookie.$user
 login_user
@@ -65,7 +65,7 @@ fi
 
 else
 
-read -s -p $'  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Пароль: \e[0m' pass
+read -s -p $' \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Пароль: \e[0m' pass
 printf "\n"
 data='{"phone_id":"'$phone'", "_csrftoken":"'$var2'", "username":"'$user'", "guid":"'$guid'", "device_id":"'$device'", "password":"'$pass'", "login_attempt_count":"0"}'
 
