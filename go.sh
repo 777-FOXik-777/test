@@ -52,7 +52,7 @@ read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Использо�
 use_cookie="${use_cookie:-${default_use_cookie}}"
 
 if [[ $use_cookie == *'Y'* || $use_cookie == *'y'* ]]; then
-printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Using saved credentials\e[0m\n"
+printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Использование сохраненных учетных данных...\e[0m\n"
 else
 rm -rf cookie.$user
 login_user
