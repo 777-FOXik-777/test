@@ -26,7 +26,7 @@ echo -e "\e[1;91m  ║ \e[1;92m│ │ │└──┐\e[1;91m╠═╣ \e[1;92m
 
 echo -e "\e[1;91m  ║ \e[1;92m┘ └─┘└──┘\e[1;91m║   \e[1;92m└──┘┴──┘┴──┘└──┘└─┴─┘"
 
-echo -e "\e[1;91m ═╩═\e[1;92m        \e[1;91m╩   перевод by \e[1;92m @SYPEXHACK"
+echo -e "\e[1;91m ═╩═\e[1;92m         \e[1;91m╩   перевод by \e[1;92m @SYPEXHACK"
 
 }
 
@@ -36,18 +36,18 @@ login_user() {
 
 if [[ $user == "" ]]; then
 printf "\n"
-printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Login\e[0m\n"
+printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Регистрация\e[0m\n"
 read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Имя пользователя: \e[0m' user
 fi
 
 
 if [[ -e cookie.$user ]]; then
 
-printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Cookies found for user\e[0m\e[1;77m %s\e[0m\n" $user
+printf "  \e[1;31m[\e[0m\e[1;77m*\e[0m\e[1;31m]\e[0m\e[1;93m Файлы cookie, найденные для пользователя\e[0m\e[1;77m %s\e[0m\n" $user
 
 default_use_cookie="Y"
 
-read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Use it?\e[0m\e[1;77m [Y/n]\e[0m ' use_cookie
+read -p $'  \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;93m Использовать их?\e[0m\e[1;77m [Y/n]\e[0m ' use_cookie
 
 use_cookie="${use_cookie:-${default_use_cookie}}"
 
