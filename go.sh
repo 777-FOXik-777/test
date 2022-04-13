@@ -18,7 +18,7 @@ ig_sig="4f8732eb9ba7d1c8e8897a75d6474d4eb3f5279137431b2aafb71fafe2abe178"
 banner() {
 echo ""
 
-echo -e "\e[1;91m ▀▀██"
+echo -e "\e[1;91m▀▀██"
 
 echo -e "\e[1;91m  ██       ▄████▄   ██▄  ▄██   ▄████▄   ██    ██  ▄▄█████▄   ▄████▄"
 
@@ -258,12 +258,12 @@ done
 menu() {
 
 printf "\n"
-printf " \e[1;31m[\e[0m\e[1;77m01\e[0m\e[1;31m]\e[0m\e[1;93m Увеличение подписчиков\e[0m\n"
-printf " \e[1;31m[\e[0m\e[1;77m02\e[0m\e[1;31m]\e[0m\e[1;93m Выход\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m1\e[0m\e[1;31m]\e[0m\e[1;93m Увеличение подписчиков\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m2\e[0m\e[1;31m]\e[0m\e[1;93m Выход\e[0m\n"
 printf "\n"
 
 
-read -p $' \e[1;31m[\e[0m\e[1;77m::\e[0m\e[1;31m]\e[0m\e[1;77m Выберите опцию: \e[0m' option
+read -p $' \e[1;31m[\e[0m\e[1;77m@\e[0m\e[1;31m]\e[0m\e[1;77m Выберите опцию: \e[0m' option
 
 if [[ $option -eq 1 ]]; then
 login_user
