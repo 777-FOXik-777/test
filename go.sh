@@ -274,6 +274,9 @@ printf "  \e[1;91m До встречи !!\e[0m\n"
 printf "\n"
 exit
 
+elif [[ $option -eq 3 ]]; then
+printf "инструмент"
+
 else
 
 printf " \e[1;93m[!] Invalid Option!\e[0m\n"
