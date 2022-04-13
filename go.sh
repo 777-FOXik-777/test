@@ -270,13 +270,13 @@ increase_followers
 
 elif [[ $option -eq 2 ]]; then
 printf "\n"
-printf "  \e[1;91mBye Пока !!\e[0m\n"
+printf "  \e[1;91m Пока !!\e[0m\n"
 printf "\n"
 exit
 
 else
 
-printf " \e[1;93m[!] Не могу найти опцию!\e[0m\n"
+printf " \e[1;93m \n [!] Не могу найти опцию!\e[0m\n"
 sleep 2
 menu
 
