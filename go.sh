@@ -272,7 +272,7 @@ if [[ $option -eq 3 ]]; then
 get_saved()
 
 
-elif [[ $option -eq 2 ]]; then
+if [[ $option -eq 2 ]]; then
 printf "\n"
 printf "  \e[1;91m Пока !!\e[0m\n"
 printf "\n"
