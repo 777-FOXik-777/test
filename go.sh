@@ -74,7 +74,7 @@ IFS=$'\n'
 hmac=$(echo -n "$data" | openssl dgst -sha256 -hmac "${ig_sig}" | cut -d " " -f2)
 useragent='User-Agent: "Instagram 10.26.0 Android (18/4.3; 320dpi; 720x1280; Xiaomi; HM 1SW; armani; qcom; en_US)"'
 
-printf "  \e[1;77m[\e[0m\e[1;92m+\e[0m\e[1;77m] Пытаюсь войти как\e[0m\e[1;93m %s\e[0m\n" $user
+printf " \e[1;77m[\e[0m\e[1;92m+\e[0m\e[1;77m] Пытаюсь войти как\e[0m\e[1;93m %s\e[0m\n" $user
 IFS=$'\n'
 var=$(curl -c cookie.$user -d "ig_sig_key_version=4&signed_body=$hmac.$data" -s --user-agent 'User-Agent: "Instagram 10.26.0 Android (18/4.3; 320dpi; 720x1280; Xiaomi; HM 1SW; armani; qcom; en_US)"' -w "\n%{http_code}\n" -H "$header" "https://i.instagram.com/api/v1/accounts/login/" | grep -o "logged_in_user\|challenge\|many tries\|Please wait" | uniq );
 if [[ $var == "challenge" ]]; then printf "\e[1;93m\n[!] Challenge required\n" ; exit 1; elif [[ $var == "logged_in_user" ]]; then printf "\e[1;92m \n[+] Login Successful\n" ; elif [[ $var == "Please wait" ]]; then echo "Please wait"; fi;
@@ -160,9 +160,9 @@ printf "\e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m] Saved:\e[0m\e[1;93m %s/videos/\e[0
 increase_followers() {
 
 printf "\n"
-printf "  \e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m] Эта техника состоит в переподписке/взаимоподписке знаменитостей.\e[0m\n"
-printf "  \e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m] Это может увеличить количество подписчиков примерно +30 за 1 час. \e[0m\n"
-printf "  \e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m]\e[0m\e[1;93m Нажмите Ctrl + C чтобы остановить \e[0m\n"
+printf " \e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m] Эта техника состоит в переподписке/взаимоподписке знаменитостей.\e[0m\n"
+printf " \e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m] Это может увеличить количество подписчиков примерно +30 за 1 час \e[0m\n"
+printf " \e[1;77m[\e[0m\e[1;31m+\e[0m\e[1;77m]\e[0m\e[1;93m Нажмите Ctrl + C чтобы остановить \e[0m\n"
 printf "\n"
 sleep 5
 
