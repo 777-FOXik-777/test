@@ -222,7 +222,7 @@ fi
 sleep 3
 
 done
-printf " \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;77m Sleeping 60 secs...\e[0m\n"
+printf " \e[1;31m[\e[0m\e[1;77m+\e[0m\e[1;31m]\e[0m\e[1;77m Сон на 60 секунд..\e[0m\n"
 sleep 60
 #unfollow
 for celeb in $(cat celeb_id); do
