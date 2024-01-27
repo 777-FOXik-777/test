@@ -1,7 +1,7 @@
 import requests
 
 # Замените 'http://example.com' на нужную вам ссылку
-url = 'http://example.com'
+url = 'https://www.olx.ua/uk'
 
 # Скачиваем страницу по ссылке
 response = requests.get(url)
