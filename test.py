@@ -23,24 +23,32 @@ subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-par
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-file_to_tunnel = 'index.html'  # Замените на нужный вам файл
 
-serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n {downloaded_folder}/{file_to_tunnel}'
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+# Получаем список файлов в скачанной папке
+downloaded_files = os.listdir(downloaded_folder)
 
-# Получаем public URL из вывода процесса Serveo
-serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+# Если есть хотя бы один файл, выбираем первый
+if downloaded_files:
+    file_to_tunnel = downloaded_files[0]
 
-print(f"Файл {file_to_tunnel} доступен по следующему public URL: {serveo_url}")
+    serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n {downloaded_folder}/{file_to_tunnel}'
+    serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
-# Добавляем задержку, чтобы скрипт не завершался сразу
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    # Прерываем выполнение при нажатии Ctrl+C
+    # Получаем public URL из вывода процесса Serveo
+    serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
-    # Завершаем процесс Serveo
-    serveo_process.terminate()
+    print(f"Файл {file_to_tunnel} доступен по следующему public URL: {serveo_url}")
 
-    print("Скрипт завершен.")
+    # Добавляем задержку, чтобы скрипт не завершался сразу
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        # Прерываем выполнение при нажатии Ctrl+C
+
+        # Завершаем процесс Serveo
+        serveo_process.terminate()
+
+        print("Скрипт завершен.")
+else:
+    print(f"В папке {downloaded_folder} нет скачанных файлов.")
