@@ -2,10 +2,12 @@ import requests
 import subprocess
 import time
 import os
+import socket
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
-# Шаг 1: Скачивание страницы
+# Получаем IP-адрес текущего сервера
+ip_address = socket.gethostbyname(socket.gethostname())
 
 # Введите URL
 url = input('\nВыбери URL ➤ ')
@@ -77,6 +79,10 @@ with open(file_path, 'w', encoding='utf-8') as file:
     file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
 
 print(f"Страница успешно скачана и сохранена в файл {file_path}")
+
+# Печатаем IP-адрес и введенный текст на сайте
+print(f"IP-адрес текущего сервера: {ip_address}")
+print(f"Текст на сайте:\n{html_content}")
 
 # Шаг 2: Запуск локального сервера
 
