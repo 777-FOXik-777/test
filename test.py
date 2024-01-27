@@ -19,7 +19,7 @@ soup = BeautifulSoup(html_content, 'html.parser')
 base_url = response.url
 
 def make_absolute_links(tag, attribute):
-    if not tag[attribute].startswith(('http://', 'https://', '//')):
+    if attribute in tag.attrs and not tag[attribute].startswith(('http://', 'https://', '//')):
         tag[attribute] = urljoin(base_url, tag[attribute])
 
 # Преобразуем относительные ссылки
@@ -126,6 +126,6 @@ except KeyboardInterrupt:
             os.remove(file_path)
         os.rmdir(image_folder)
     
-    os.system("rm -fr index.html")
-    os.system("rm -fr downloaded_page.html")
+    os.remove("index.html")
+    os.remove("downloaded_page.html")
     print("Скрипт завершен. Все скачанные файлы удалены.")
