@@ -1,15 +1,31 @@
 import requests
 import subprocess
+import tempfile
+import os
 
-url = "https://www.olx.ua/uk/"
+# Замените 'https://example.com' на фактическую ссылку страницы
+url = 'https://www.olx.ua/uk/'
 
+# Скачиваем страницу
 response = requests.get(url)
+html_content = response.text
 
-if response.status_code == 200:
-    with open("page.html", "wb") as f:
-        f.write(response.content)
+# Создаем временный файл для сохранения скачанной страницы
+with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.html') as temp_file:
+    temp_file.write(html_content)
+    temp_file_path = temp_file.name
 
-    ssh_command = "ssh -R 80:localhost:8080 nokey@localhost.run -T -n 2>&1 | awk '/.lhr.life/ {print $6}'"
-    url = subprocess.getoutput(ssh_command)
+# Команда для отправки файла на удаленный сервер через ssh
+ssh_command = f'ssh -R 80:localhost:8080 nokey@localhost.run -T -n "cat > ~/remote_page.html" < {temp_file_path}'
 
-    print(url)
+# Выполняем команду через subprocess
+subprocess.run(ssh_command, shell=True)
+
+# Удаляем временный файл
+os.remove(temp_file_path)
+
+# Получаем URL удаленной страницы
+remote_page_url_command = 'ssh -R 80:localhost:8080 nokey@localhost.run -T -n 2>&1 | awk \'/\.lhr\.life/ {print $6}\''
+remote_page_url = subprocess.getoutput(remote_page_url_command)
+
+print(f'Страница доступна по URL: {remote_page_url}')
