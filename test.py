@@ -35,9 +35,12 @@ print(f"Страница успешно скачана и сохранена в 
 
 # Шаг 2: Запуск локального сервера
 
+# Создаем копию soup для сохранения в index.html
+soup_copy = soup
+
 # Копируем содержимое файла в файл index.html в текущей рабочей директории
 with open('index.html', 'w', encoding='utf-8') as file:
-    file.write(str(soup))
+    file.write(str(soup_copy))
 
 # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
 local_server_command = 'python -m http.server 8000'
