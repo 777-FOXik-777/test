@@ -1,4 +1,4 @@
- import requests
+import requests
 import subprocess
 import time
 import os
@@ -100,15 +100,26 @@ print("Локальный сервер запущен на порту 8000")
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T 2>&1 | awk '/^\\[SERVEO\\]/{print $3}' > serveo_output.txt"
+
+# Запускаем команду для Serveo с помощью subprocess
+serveo_process = subprocess.Popen(serveo_command, shell=True)
+
+# Ожидаем, пока Serveo не выдаст public URL
+while True:
+    time.sleep(1)
+    with open('serveo_output.txt', 'r') as serveo_output_file:
+        serveo_output = serveo_output_file.read()
+        if serveo_output.strip() != "":
+            break
 
 # Получаем public URL из вывода процесса Serveo
-serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+serveo_url = serveo_output.strip()
 
+# Печатаем public URL
 print(f"Файл доступен по следующему public URL: {serveo_url}")
 
-# Добавляем задержку, чтобы скрипт не завершался сразу
+# Прерываем выполнение при нажатии Ctrl+C
 try:
     while True:
         time.sleep(1)
@@ -126,6 +137,7 @@ except KeyboardInterrupt:
             os.remove(file_path)
         os.rmdir(image_folder)
     
-    os.system("rm -fr index.html")
-    os.system("rm -fr downloaded_page.html")
+    os.remove("index.html")
+    os.remove("downloaded_page.html")
+    os.remove("serveo_output.txt")
     print("Скрипт завершен. Все скачанные файлы удалены.")
