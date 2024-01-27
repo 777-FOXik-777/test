@@ -19,8 +19,10 @@ soup = BeautifulSoup(html_content, 'html.parser')
 base_url = response.url
 
 def make_absolute_links(tag, attribute):
-    if attribute in tag.attrs and not tag[attribute].startswith(('http://', 'https://', '//')):
-        tag[attribute] = urljoin(base_url, tag[attribute])
+    if attribute in tag.attrs:
+        if not tag[attribute].startswith(('http://', 'https://', '//')):
+            tag[attribute] = urljoin(base_url, tag[attribute])
+
 
 # Преобразуем относительные ссылки
 for tag in soup.find_all(['a', 'link'], href=True):
