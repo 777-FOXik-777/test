@@ -16,12 +16,27 @@ time.sleep(5)
 # Ждем, пока wget завершит загрузку изображений
 subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-parent', '--no-clobber', '--convert-links', '--page-requisites', url])
 
-# Шаг 2: Запуск Serveo.net для тунелирования файла
+# Шаг 2: Поиск свободного порта для локального сервера
+
+# Находим свободный порт
+for port in range(8000, 8100):
+    try:
+        local_server_command = f'python -m http.server {port}'
+        subprocess.run(local_server_command, shell=True, check=True)
+        break
+    except subprocess.CalledProcessError:
+        continue
+
+print(f"Локальный сервер запущен на порту {port}")
+
+# Ждем, чтобы сервер успел запуститься и обработать запросы
+time.sleep(5)
+
+# Шаг 3: Запуск Serveo.net для тунелирования файла
 
 # Используем оригинальную команду Serveo.net без изменений
-tru_201 = '8000'  # Замените на нужный вам порт
-
-serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n index.html'
+tru_port = str(port)  # Используем тот же порт, на котором запущен локальный сервер
+serveo_command = f'ssh -R 80:localhost:{tru_port} serveo.net -T -n index.html'
 serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
 # Получаем public URL из вывода процесса Serveo
