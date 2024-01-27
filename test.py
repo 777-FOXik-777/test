@@ -100,8 +100,8 @@ print("Локальный сервер запущен на порту 8000")
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T > /dev/null 2>&1"
+serveo_process = subprocess.Popen(serveo_command, shell=True)
 
 # Получаем public URL из вывода процесса Serveo
 serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
