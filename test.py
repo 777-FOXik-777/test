@@ -1,6 +1,7 @@
 import requests
 import subprocess
 import time
+import re
 
 # Шаг 1: Скачивание страницы
 
@@ -23,16 +24,26 @@ print("Страница успешно скачана и сохранена в �
 serveo_subdomain = 'your-serveo-subdomain'
 
 # Выполняем команду для проброса порта на serveo.net
-serveo_command = f'ssh -R 80:localhost:8080 {serveo_subdomain}.serveo.net -T -n 2>&1 | awk \'/serveo.net/ {{print $5}}\''
+serveo_command = f'ssh -R 80:localhost:8080 {serveo_subdomain}.serveo.net -T -n'
 
 # Запускаем команду для Serveo.net с помощью subprocess
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-# Получаем вывод команды (URL Serveo)
-serveo_output = serveo_process.stdout.read().decode('utf-8').strip()
+# Ждем, пока команда не завершится
+serveo_output, serveo_error = serveo_process.communicate()
 
-# Печатаем URL Serveo
-print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_output}")
+# Печатаем вывод и ошибки (если есть)
+print("Вывод команды Serveo:", serveo_output.decode('utf-8'))
+print("Ошибка команды Serveo:", serveo_error.decode('utf-8'))
+
+# Пытаемся извлечь URL Serveo из вывода
+serveo_match = re.search(r'https://\S+', serveo_output.decode('utf-8'))
+if serveo_match:
+    serveo_url = serveo_match.group()
+    print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_url}")
+else:
+    print("Не удалось извлечь URL Serveo. Возможно, что-то пошло не так.")
+    serveo_process.terminate()
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
