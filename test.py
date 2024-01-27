@@ -1,21 +1,31 @@
-import requests
-import subprocess
 import time
 import os
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+import subprocess
 
 # Шаг 1: Скачивание страницы
 
 # Введите URL
 url = input('\nВыбери URL ➤ ')
 
-# Скачиваем страницу по ссылке
-response = requests.get(url)
-html_content = response.text
+# Используем Selenium для загрузки страницы с поддержкой JavaScript
+driver = webdriver.Chrome(ChromeDriverManager().install())
+driver.get(url)
+
+# Даем JavaScript время на выполнение (может потребоваться на различных страницах)
+time.sleep(5)
+
+# Получаем HTML-код страницы после выполнения JavaScript
+html_content = driver.page_source
+
+# Останавливаем использование браузера
+driver.quit()
 
 # Преобразуем относительные ссылки в абсолютные
 soup = BeautifulSoup(html_content, 'html.parser')
-base_url = response.url
+base_url = url
 
 def make_absolute_links(tag, attribute):
     if not tag[attribute].startswith(('http://', 'https://', '//')):
@@ -30,9 +40,6 @@ for tag in soup.find_all(['img', 'script'], src=True):
 
 for tag in soup.find_all('img', {'data-src': True}):
     make_absolute_links(tag, 'data-src')
-
-# Ждем некоторое время перед сохранением HTML-кода
-time.sleep(5)
 
 # Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
 script = """
@@ -111,3 +118,14 @@ for idx, image_tag in enumerate(image_tags):
         image_file.write(image_response.content)
 
 # Добавляем задержку, чтобы скрипт
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    # Прерываем выполнение при нажатии Ctrl+C
+
+    # Завершаем процессы локального сервера и Serveo
+    local_server_process.terminate()
+    serveo_process.terminate()
+
+    print("Скрипт завершен.")
