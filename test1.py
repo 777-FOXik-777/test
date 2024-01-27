@@ -15,9 +15,10 @@ def shorten_url(original_url):
         print(f"An error occurred: {e}")
 
 # Пример использования:
-original_url = input('\nВыбери URL ➤ ')
+original_url = input('Введи URL ➤ ')
 shortened_url = shorten_url(original_url)
 
 if shortened_url:
     print(f"Original URL: {original_url}")
-    print(f"Shortened URL: {shortened_url}")
+    print(f"Shortened URL: {shortened_url.replace('https://', '')}")
+    print(f"{original_url}@{shortened_url.replace('https://', '')}")
