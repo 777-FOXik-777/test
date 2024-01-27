@@ -9,8 +9,6 @@ from bs4 import BeautifulSoup
 # Замените 'http://example.com' на нужную вам ссылку
 url = 'https://www.olx.ua/uk'
 
-url = input('\n Выбери url ➤ ')
-
 # Скачиваем страницу по ссылке
 response = requests.get(url)
 html_content = response.text
