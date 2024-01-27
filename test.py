@@ -8,7 +8,7 @@ import os
 url = input('\nВыбери URL ➤ ')
 
 # Используем wget для загрузки HTML-кода страницы и сохранения его как index.html
-subprocess.run(['wget', '--recursive', '--convert-links', '--page-requisites', '--no-parent', '--output-document=index.html', url])
+subprocess.run(['wget', '--recursive', '--convert-links', '--page-requisites', '--no-parent', '--directory-prefix=index.html', url])
 
 # Ждем некоторое время перед обработкой HTML-кода
 time.sleep(5)
@@ -17,7 +17,7 @@ time.sleep(5)
 subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-parent', '--no-clobber', '--convert-links', '--page-requisites', url])
 
 # Определяем переменную downloaded_folder
-downloaded_folder = os.path.dirname(os.path.abspath(__file__))
+downloaded_folder = os.path.abspath('index.html')
 
 # Шаг 2: Запуск Serveo.net для тунелирования файла
 
