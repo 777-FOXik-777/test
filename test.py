@@ -47,6 +47,9 @@ local_server_process = subprocess.Popen(local_server_command, shell=True, stdout
 # Печатаем сообщение о запуске локального сервера
 print("Локальный сервер запущен на порту 8000")
 
+print("")
+os.system("""ssh -R 80:localhost:8080 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""")
+
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
     while True:
