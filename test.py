@@ -31,6 +31,21 @@ for tag in soup.find_all('img', {'data-src': True}):
 # Ждем некоторое время перед сохранением HTML-кода
 time.sleep(5)
 
+# Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
+script = """
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var lazyImages = document.querySelectorAll('img[data-src]');
+        lazyImages.forEach(function(img) {
+            img.setAttribute('src', img.getAttribute('data-src'));
+        });
+    });
+</script>
+"""
+
+# Вставляем скрипт в конец HTML-страницы
+soup.body.append(BeautifulSoup(script, 'html.parser'))
+
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
