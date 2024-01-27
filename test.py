@@ -6,15 +6,11 @@ from bs4 import BeautifulSoup
 
 # Шаг 1: Скачивание страницы
 
-url = input('\nВыберите URL ➤ ')
+# Замените 'http://example.com' на нужную вам ссылку
+url = input('\n Выбери url ➤ ')
 
-try:
-    response = requests.get(url)
-    response.raise_for_status()
-except requests.RequestException as e:
-    print(f"Ошибка при запросе страницы: {e}")
-    exit()
-
+# Скачиваем страницу по ссылке
+response = requests.get(url)
 html_content = response.text
 
 # Преобразуем относительные ссылки в абсолютные
@@ -27,37 +23,39 @@ for tag in soup.find_all(['img', 'script'], src=True):
     if not tag['src'].startswith(('http://', 'https://', '//')):
         tag['src'] = base_url + tag['src']
 
+# Ждем некоторое время перед сохранением HTML-кода
+time.sleep(5)
+
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
     file.write(str(soup))
-print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
-# Копируем содержимое файла в файл index.html в текущей рабочей директории
-index_file_path = 'index.html'
-with open(index_file_path, 'w', encoding='utf-8') as file:
-    file.write(str(soup))
+print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
 # Шаг 2: Запуск локального сервера
 
+# Копируем содержимое файла в файл index.html в текущей рабочей директории
+with open('index.html', 'w', encoding='utf-8') as file:
+    file.write(str(soup))
+
+# Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
 local_server_command = 'python -m http.server 8000'
 
-try:
-    subprocess.run(local_server_command, shell=True, check=True)
-    print("Локальный сервер успешно запущен на порту 8000")
-except subprocess.CalledProcessError as e:
-    print(f"Ошибка при запуске локального сервера: {e}")
-    exit()
+# Запускаем команду для локального сервера с помощью subprocess
+local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
 
-# Добавляем задержку, чтобы сервер успел запуститься
-time.sleep(2)
+# Печатаем сообщение о запуске локального сервера
+print("Локальный сервер запущен на порту 8000")
+
+# Добавляем задержку, чтобы сервер успел запуститься и обработать запросы
+time.sleep(5)
 
 # Шаг 3: Запуск Serveo.net
 
-try:
-    subprocess.run("""ssh -R 80:localhost:8000 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""", shell=True, check=True)
-except subprocess.CalledProcessError as e:
-    print(f"Ошибка при запуске Serveo.net: {e}")
+# Используем оригинальную команду Serveo.net без изменений
+tru_201 = '8000'  # Замените на нужный вам порт
+os.system(f"""ssh -R 80:localhost:{tru_201} serveo.net -T -n 2>&1 | awk '/serveo.net/ {{print $5}}'""")
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
@@ -67,5 +65,6 @@ except KeyboardInterrupt:
     # Прерываем выполнение при нажатии Ctrl+C
 
     # Завершаем процесс локального сервера
-    subprocess.run(["pkill", "-f", "python -m http.server"])
+    local_server_process.terminate()
+
     print("Скрипт завершен.")
