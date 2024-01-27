@@ -1,7 +1,7 @@
 import requests
 import subprocess
 import time
-import re
+import os
 
 # Шаг 1: Скачивание страницы
 
@@ -13,37 +13,25 @@ response = requests.get(url)
 html_content = response.text
 
 # Сохраняем HTML-код в файл
-with open('downloaded_page.html', 'w', encoding='utf-8') as file:
+file_path = 'downloaded_page.html'
+with open(file_path, 'w', encoding='utf-8') as file:
     file.write(html_content)
 
-print("Страница успешно скачана и сохранена в файл downloaded_page.html")
+print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
-# Шаг 2: Запуск на Serveo.net
+# Шаг 2: Запуск локального сервера
 
-# Замените 'your-serveo-subdomain' на ваш собственный поддомен на serveo.net
-serveo_subdomain = 'your-serveo-subdomain'
+# Получаем текущую рабочую директорию
+current_directory = os.getcwd()
 
-# Выполняем команду для проброса порта на serveo.net
-serveo_command = f'ssh -R 80:localhost:8080 {serveo_subdomain}.serveo.net -T -n'
+# Выполняем команду для запуска локального сервера на порту 8080
+local_server_command = f'python -m http.server --directory {current_directory} 8080'
 
-# Запускаем команду для Serveo.net с помощью subprocess
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+# Запускаем команду для локального сервера с помощью subprocess
+local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
 
-# Ждем, пока команда не завершится
-serveo_output, serveo_error = serveo_process.communicate()
-
-# Печатаем вывод и ошибки (если есть)
-print("Вывод команды Serveo:", serveo_output.decode('utf-8'))
-print("Ошибка команды Serveo:", serveo_error.decode('utf-8'))
-
-# Пытаемся извлечь URL Serveo из вывода
-serveo_match = re.search(r'https://\S+', serveo_output.decode('utf-8'))
-if serveo_match:
-    serveo_url = serveo_match.group()
-    print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_url}")
-else:
-    print("Не удалось извлечь URL Serveo. Возможно, что-то пошло не так.")
-    serveo_process.terminate()
+# Печатаем сообщение о запуске локального сервера
+print("Локальный сервер запущен на порту 8080")
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
@@ -51,4 +39,8 @@ try:
         time.sleep(1)
 except KeyboardInterrupt:
     # Прерываем выполнение при нажатии Ctrl+C
+
+    # Завершаем процесс локального сервера
+    local_server_process.terminate()
+
     print("Скрипт завершен.")
