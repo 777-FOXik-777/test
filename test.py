@@ -23,7 +23,6 @@ def make_absolute_links(tag, attribute):
         if not tag[attribute].startswith(('http://', 'https://', '//')):
             tag[attribute] = urljoin(base_url, tag[attribute])
 
-
 # Преобразуем относительные ссылки
 for tag in soup.find_all(['a', 'link'], href=True):
     make_absolute_links(tag, 'href')
@@ -60,18 +59,19 @@ image_paths = []
 image_tags = soup.find_all('img')
 for img_tag in image_tags:
     make_absolute_links(img_tag, 'src')
-    image_url = img_tag['src']
-    image_name = os.path.basename(urlparse(image_url).path)
-    image_path = os.path.join(image_folder, image_name)
-    
-    try:
-        image_content = requests.get(image_url).content
-        with open(image_path, 'wb') as image_file:
-            image_file.write(image_content)
-        print(f"Изображение сохранено: {image_path}")
-        image_paths.append(image_path)
-    except Exception as e:
-        print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+    if 'src' in img_tag.attrs:
+        image_url = img_tag['src']
+        image_name = os.path.basename(urlparse(image_url).path)
+        image_path = os.path.join(image_folder, image_name)
+        
+        try:
+            image_content = requests.get(image_url).content
+            with open(image_path, 'wb') as image_file:
+                image_file.write(image_content)
+            print(f"Изображение сохранено: {image_path}")
+            image_paths.append(image_path)
+        except Exception as e:
+            print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
 
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
