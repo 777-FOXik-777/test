@@ -4,22 +4,6 @@ import time
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
-import socket
-
-# Получение IP-адреса клиента
-def get_client_ip():
-    try:
-        ip = requests.get('https://api64.ipify.org?format=json').json()['ip']
-    except Exception as e:
-        print(f"Ошибка при получении IP-адреса: {str(e)}")
-        ip = "unknown"
-    return ip
-
-# Логирование IP и текста
-def log_ip_and_text(ip, text):
-    log_file_path = 'log.txt'
-    with open(log_file_path, 'a', encoding='utf-8') as log_file:
-        log_file.write(f"IP: {ip}, Text: {text}\n")
 
 # Шаг 1: Скачивание страницы
 
@@ -34,19 +18,63 @@ html_content = response.text
 soup = BeautifulSoup(html_content, 'html.parser')
 base_url = response.url
 
-# ... (остальной код не изменяется)
+def make_absolute_links(tag, attribute):
+    if not tag[attribute].startswith(('http://', 'https://', '//')):
+        tag[attribute] = urljoin(base_url, tag[attribute])
+
+# Преобразуем относительные ссылки
+for tag in soup.find_all(['a', 'link'], href=True):
+    make_absolute_links(tag, 'href')
+
+for tag in soup.find_all(['img', 'script'], src=True):
+    make_absolute_links(tag, 'src')
+
+for tag in soup.find_all('img', {'data-src': True}):
+    make_absolute_links(tag, 'data-src')
+
+# Ждем некоторое время перед сохранением HTML-кода
+time.sleep(5)
+
+# Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
+script = """
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var lazyImages = document.querySelectorAll('img[data-src]');
+        lazyImages.forEach(function(img) {
+            img.setAttribute('src', img.getAttribute('data-src'));
+        });
+    });
+</script>
+"""
+
+# Вставляем скрипт в конец HTML-страницы
+soup.body.append(BeautifulSoup(script, 'html.parser'))
+
+# Проверяем наличие изображений на странице и сохраняем их
+image_folder = 'images'
+os.makedirs(image_folder, exist_ok=True)
+
+image_paths = []
+image_tags = soup.find_all('img')
+for img_tag in image_tags:
+    make_absolute_links(img_tag, 'src')
+    image_url = img_tag['src']
+    image_name = os.path.basename(urlparse(image_url).path)
+    image_path = os.path.join(image_folder, image_name)
+    
+    try:
+        image_content = requests.get(image_url).content
+        with open(image_path, 'wb') as image_file:
+            image_file.write(image_content)
+        print(f"Изображение сохранено: {image_path}")
+        image_paths.append(image_path)
+    except Exception as e:
+        print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
 
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
     file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
-
-# Получаем IP и введенный текст
-client_ip = get_client_ip()
-input_text = input('\nВведите текст для логирования ➤ ')
-
-# Логируем IP и введенный текст
-log_ip_and_text(client_ip, input_text)
 
 print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
@@ -92,13 +120,12 @@ except KeyboardInterrupt:
     serveo_process.terminate()
 
     # Удаляем все скачанные файлы
-    if os.path.exists('images'):
-        for file in os.listdir('images'):
-            file_path = os.path.join('images', file)
+    if os.path.exists(image_folder):
+        for file in os.listdir(image_folder):
+            file_path = os.path.join(image_folder, file)
             os.remove(file_path)
-        os.rmdir('images')
-
-    os.remove('index.html')
-    os.remove('downloaded_page.html')
-
+        os.rmdir(image_folder)
+    
+    os.system("rm -fr index.html")
+    os.system("rm -fr downloaded_page.html")
     print("Скрипт завершен. Все скачанные файлы удалены.")
