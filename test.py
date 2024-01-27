@@ -25,7 +25,7 @@ time.sleep(5)
 # Шаг 2: Запуск Serveo.net для тунелирования файла
 
 # Используем оригинальную команду Serveo.net без изменений
-tru_port = '8080'  # Замените на нужный вам порт
+tru_port = '8081'  # Замените на нужный вам порт
 file_to_tunnel = 'index.html'  # Замените на нужный вам файл
 
 serveo_command = f'ssh -R 80:localhost:{tru_port} serveo.net -T -n {downloaded_folder}/{file_to_tunnel}'
