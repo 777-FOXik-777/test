@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 # Шаг 1: Скачивание страницы
 
 # Замените 'http://example.com' на нужную вам ссылку
-url = 'https://www.olx.ua/uk'
+url = input('\n Выбери url ➤ ')
 
 # Скачиваем страницу по ссылке
 response = requests.get(url)
@@ -51,7 +51,7 @@ time.sleep(2)
 # Шаг 3: Запуск Serveo.net
 
 # Используем оригинальную команду Serveo.net без изменений
-os.system("""ssh -R 80:localhost:8080 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""")
+os.system("""ssh -R 80:localhost:8000 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""")
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
