@@ -46,6 +46,20 @@ script = """
 # Вставляем скрипт в конец HTML-страницы
 soup.body.append(BeautifulSoup(script, 'html.parser'))
 
+# Добавляем стили для элементов управления (ваш пример - три полоски)
+styles = """
+<style>
+    /* Добавьте стили для элементов управления */
+    .menu-icon {
+        /* Ваши стили для иконки меню (три полоски) */
+    }
+    /* Другие стили по необходимости */
+</style>
+"""
+
+# Вставляем стили в конец HTML-страницы
+soup.head.append(BeautifulSoup(styles, 'html.parser'))
+
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
