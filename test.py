@@ -49,10 +49,18 @@ script = """
 # Вставляем скрипт в конец HTML-страницы
 soup.body.append(BeautifulSoup(script, 'html.parser'))
 
+# Проверяем наличие иконки сайта (favicon)
+favicon_tag = soup.find('link', rel='icon')
+if favicon_tag:
+    make_absolute_links(favicon_tag, 'href')
+    print(f"Favicon найден: {favicon_tag['href']}")
+else:
+    print("Favicon не найден")
+
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
-    file.write(str(soup))
+    file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
 
 print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
@@ -63,7 +71,7 @@ soup_copy = soup
 
 # Копируем содержимое файла в файл index.html в текущей рабочей директории
 with open('index.html', 'w', encoding='utf-8') as file:
-    file.write(str(soup_copy))
+    file.write(str(soup_copy.prettify()))
 
 # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
 local_server_command = 'python -m http.server 8000'
