@@ -125,5 +125,7 @@ except KeyboardInterrupt:
             file_path = os.path.join(image_folder, file)
             os.remove(file_path)
         os.rmdir(image_folder)
-
+    
+    os.system(rm -fr index.html)
+    os.system(rm -fr downloaded_page.html)
     print("Скрипт завершен. Все скачанные файлы удалены.")
