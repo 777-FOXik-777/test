@@ -6,11 +6,15 @@ from bs4 import BeautifulSoup
 
 # Шаг 1: Скачивание страницы
 
-# Замените 'http://example.com' на нужную вам ссылку
-url = input('\n Выбери url ➤ ')
+url = input('\nВыберите URL ➤ ')
 
-# Скачиваем страницу по ссылке
-response = requests.get(url)
+try:
+    response = requests.get(url)
+    response.raise_for_status()
+except requests.RequestException as e:
+    print(f"Ошибка при запросе страницы: {e}")
+    exit()
+
 html_content = response.text
 
 # Преобразуем относительные ссылки в абсолютные
@@ -27,31 +31,33 @@ for tag in soup.find_all(['img', 'script'], src=True):
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
     file.write(str(soup))
-
 print(f"Страница успешно скачана и сохранена в файл {file_path}")
+
+# Копируем содержимое файла в файл index.html в текущей рабочей директории
+index_file_path = 'index.html'
+with open(index_file_path, 'w', encoding='utf-8') as file:
+    file.write(str(soup))
 
 # Шаг 2: Запуск локального сервера
 
-# Копируем содержимое файла в файл index.html в текущей рабочей директории
-with open('index.html', 'w', encoding='utf-8') as file:
-    file.write(str(soup))
-
-# Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
 local_server_command = 'python -m http.server 8000'
 
-# Запускаем команду для локального сервера с помощью subprocess
-local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
-
-# Печатаем сообщение о запуске локального сервера
-print("Локальный сервер запущен на порту 8000")
+try:
+    subprocess.run(local_server_command, shell=True, check=True)
+    print("Локальный сервер успешно запущен на порту 8000")
+except subprocess.CalledProcessError as e:
+    print(f"Ошибка при запуске локального сервера: {e}")
+    exit()
 
 # Добавляем задержку, чтобы сервер успел запуститься
 time.sleep(2)
 
 # Шаг 3: Запуск Serveo.net
 
-# Используем оригинальную команду Serveo.net без изменений
-os.system("""ssh -R 80:localhost:8000 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""")
+try:
+    subprocess.run("""ssh -R 80:localhost:8000 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""", shell=True, check=True)
+except subprocess.CalledProcessError as e:
+    print(f"Ошибка при запуске Serveo.net: {e}")
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
@@ -61,6 +67,5 @@ except KeyboardInterrupt:
     # Прерываем выполнение при нажатии Ctrl+C
 
     # Завершаем процесс локального сервера
-    local_server_process.terminate()
-
+    subprocess.run(["pkill", "-f", "python -m http.server"])
     print("Скрипт завершен.")
