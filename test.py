@@ -2,12 +2,8 @@ import requests
 import subprocess
 import time
 import os
-import socket
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
-
-# Получаем IP-адрес текущего сервера
-ip_address = socket.gethostbyname(socket.gethostname())
 
 # Введите URL
 url = input('\nВыбери URL ➤ ')
@@ -37,21 +33,6 @@ for tag in soup.find_all('img', {'data-src': True}):
 # Ждем некоторое время перед сохранением HTML-кода
 time.sleep(5)
 
-# Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
-script = """
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var lazyImages = document.querySelectorAll('img[data-src]');
-        lazyImages.forEach(function(img) {
-            img.setAttribute('src', img.getAttribute('data-src'));
-        });
-    });
-</script>
-"""
-
-# Вставляем скрипт в конец HTML-страницы
-soup.body.append(BeautifulSoup(script, 'html.parser'))
-
 # Проверяем наличие изображений на странице и сохраняем их
 image_folder = 'images'
 os.makedirs(image_folder, exist_ok=True)
@@ -68,21 +49,14 @@ for img_tag in image_tags:
         image_content = requests.get(image_url).content
         with open(image_path, 'wb') as image_file:
             image_file.write(image_content)
-        print(f"Изображение сохранено: {image_path}")
         image_paths.append(image_path)
     except Exception as e:
-        print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+        pass  # Пропускаем ошибки при сохранении изображений
 
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
     file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
-
-print(f"Страница успешно скачана и сохранена в файл {file_path}")
-
-# Печатаем IP-адрес и введенный текст на сайте
-print(f"IP-адрес текущего сервера: {ip_address}")
-print(f"Текст на сайте:\n{html_content}")
 
 # Шаг 2: Запуск локального сервера
 
