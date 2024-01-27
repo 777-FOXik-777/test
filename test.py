@@ -1,93 +1,68 @@
 import requests
 import subprocess
 import time
-import os
 from bs4 import BeautifulSoup
 
-# Шаг 1: Скачивание страницы
+def download_page(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Проверка на успешный запрос
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при скачивании страницы: {e}")
+        return None
 
-# Замените 'http://example.com' на нужную вам ссылку
-url = input('\n Выбери url ➤ ')
+def make_absolute_links(soup, base_url):
+    for tag in soup.find_all(['a', 'link'], href=True):
+        if not tag['href'].startswith(('http://', 'https://', '//')):
+            tag['href'] = base_url + tag['href']
+    for tag in soup.find_all(['img', 'script'], src=True):
+        if not tag['src'].startswith(('http://', 'https://', '//')):
+            tag['src'] = base_url + tag['src']
+    for tag in soup.find_all('img', {'data-src': True}):
+        if not tag['data-src'].startswith(('http://', 'https://', '//')):
+            tag['data-src'] = base_url + tag['data-src']
 
-# Скачиваем страницу по ссылке
-response = requests.get(url)
-html_content = response.text
+def save_html_to_file(soup, file_path):
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(str(soup))
 
-# Преобразуем относительные ссылки в абсолютные
-soup = BeautifulSoup(html_content, 'html.parser')
-base_url = response.url
-for tag in soup.find_all(['a', 'link'], href=True):
-    if not tag['href'].startswith(('http://', 'https://', '//')):
-        tag['href'] = base_url + tag['href']
-for tag in soup.find_all(['img', 'script'], src=True):
-    if not tag['src'].startswith(('http://', 'https://', '//')):
-        tag['src'] = base_url + tag['src']
+def run_local_server():
+    local_server_command = ['python', '-m', 'http.server', '8000']
+    subprocess.run(local_server_command, check=True)
 
-# Преобразуем относительные ссылки из атрибута data-src в абсолютные
-for tag in soup.find_all('img', {'data-src': True}):
-    if not tag['data-src'].startswith(('http://', 'https://', '//')):
-        tag['data-src'] = base_url + tag['data-src']
+def main():
+    url = input('\nВыберите URL ➤ ')
+    html_content = download_page(url)
 
-# Ждем некоторое время перед сохранением HTML-кода
-time.sleep(5)
+    if html_content:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        base_url = response.url
 
-# Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
-script = """
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var lazyImages = document.querySelectorAll('img[data-src]');
-        lazyImages.forEach(function(img) {
-            img.setAttribute('src', img.getAttribute('data-src'));
-        });
-    });
-</script>
-"""
+        make_absolute_links(soup, base_url)
 
-# Вставляем скрипт в конец HTML-страницы
-soup.body.append(BeautifulSoup(script, 'html.parser'))
+        time.sleep(5)
 
-# Сохраняем HTML-код в файл
-file_path = 'downloaded_page.html'
-with open(file_path, 'w', encoding='utf-8') as file:
-    file.write(str(soup))
+        script = """
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var lazyImages = document.querySelectorAll('img[data-src]');
+                lazyImages.forEach(function(img) {
+                    img.setAttribute('src', img.getAttribute('data-src'));
+                });
+            });
+        </script>
+        """
+        soup.body.append(BeautifulSoup(script, 'html.parser'))
 
-print(f"Страница успешно скачана и сохранена в файл {file_path}")
+        save_html_to_file(soup, 'downloaded_page.html')
+        print("Страница успешно скачана и сохранена в файл downloaded_page.html")
 
-# Шаг 2: Запуск локального сервера
+        save_html_to_file(soup, 'index.html')
+        print("Копия страницы сохранена в файл index.html")
 
-# Создаем копию soup для сохранения в index.html
-soup_copy = soup
+        print("Запуск локального сервера...")
+        run_local_server()
 
-# Копируем содержимое файла в файл index.html в текущей рабочей директории
-with open('index.html', 'w', encoding='utf-8') as file:
-    file.write(str(soup_copy))
-
-# Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
-local_server_command = 'python -m http.server 8000'
-
-# Запускаем команду для локального сервера с помощью subprocess
-local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
-
-# Печатаем сообщение о запуске локального сервера
-print("Локальный сервер запущен на порту 8000")
-
-# Добавляем задержку, чтобы сервер успел запуститься и обработать запросы
-time.sleep(5)
-
-# Шаг 3: Запуск Serveo.net
-
-# Используем оригинальную команду Serveo.net без изменений
-tru_201 = '8000'  # Замените на нужный вам порт
-os.system(f"""ssh -R 80:localhost:{tru_201} serveo.net -T -n 2>&1 | awk '/serveo.net/ {{print $5}}'""")
-
-# Добавляем задержку, чтобы скрипт не завершался сразу
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    # Прерываем выполнение при нажатии Ctrl+C
-
-    # Завершаем процесс локального сервера
-    local_server_process.terminate()
-
-    print("Скрипт завершен.")
+if __name__ == "__main__":
+    main()
