@@ -103,6 +103,13 @@ tru_201 = '8000'  # Замените на нужный вам порт
 serveo_command = f"ssh -R 80:localhost:{tru_201} serveo.net -T"
 serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
+# Получаем public URL из вывода процесса Serveo
+serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+
+print(f"Файл {file_to_tunnel} доступен по следующему public URL: {serveo_url}")
+
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
     while True:
