@@ -1,6 +1,8 @@
-import os
 import requests
-from requests_html import HTMLSession
+import subprocess
+import time
+import os
+from bs4 import BeautifulSoup
 
 # Шаг 1: Скачивание страницы
 
@@ -10,18 +12,31 @@ url = 'https://www.olx.ua/uk'
 url = input('\n Выбери url ➤ ')
 
 # Скачиваем страницу по ссылке
-session = HTMLSession()
-response = session.get(url)
-response.html.render()
+response = requests.get(url)
+html_content = response.text
+
+# Преобразуем относительные ссылки в абсолютные
+soup = BeautifulSoup(html_content, 'html.parser')
+base_url = response.url
+for tag in soup.find_all(['a', 'link', 'img', 'script'], href=True):
+    if not tag['href'].startswith(('http://', 'https://', '//')):
+        tag['href'] = base_url + tag['href']
+for tag in soup.find_all(['img', 'script'], src=True):
+    if not tag['src'].startswith(('http://', 'https://', '//')):
+        tag['src'] = base_url + tag['src']
 
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
 with open(file_path, 'w', encoding='utf-8') as file:
-    file.write(response.html.html)
+    file.write(str(soup))
 
 print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
 # Шаг 2: Запуск локального сервера
+
+# Копируем содержимое файла в файл index.html в текущей рабочей директории
+with open('index.html', 'w', encoding='utf-8') as file:
+    file.write(str(soup))
 
 # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
 local_server_command = 'python -m http.server 8000'
