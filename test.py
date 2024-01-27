@@ -1,30 +1,21 @@
 import time
 import os
-from bs4 import BeautifulSoup
-from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
 import subprocess
+from bs4 import BeautifulSoup
 
 # Шаг 1: Скачивание страницы
 
 # Введите URL
 url = input('\nВыбери URL ➤ ')
 
-# Используем Selenium для загрузки страницы с поддержкой JavaScript
-driver = webdriver.Chrome(ChromeDriverManager().install())
-driver.get(url)
+# Используем wget для загрузки HTML-кода страницы
+subprocess.run(['wget', '--recursive', '--convert-links', '--page-requisites', '--no-parent', '-nc', url])
 
-# Даем JavaScript время на выполнение (может потребоваться на различных страницах)
+# Ждем некоторое время перед обработкой HTML-кода
 time.sleep(5)
 
-# Получаем HTML-код страницы после выполнения JavaScript
-html_content = driver.page_source
-
-# Останавливаем использование браузера
-driver.quit()
-
 # Преобразуем относительные ссылки в абсолютные
-soup = BeautifulSoup(html_content, 'html.parser')
+soup = BeautifulSoup(open("index.html"), 'html.parser')
 base_url = url
 
 def make_absolute_links(tag, attribute):
@@ -64,21 +55,11 @@ else:
     soup.insert(0, BeautifulSoup('<head></head>', 'html.parser'))
     soup.head.append(BeautifulSoup(script, 'html.parser'))
 
-# Сохраняем HTML-код в файл
-file_path = 'downloaded_page.html'
-with open(file_path, 'w', encoding='utf-8') as file:
+# Сохраняем обновленный HTML-код в файл
+with open('index.html', 'w', encoding='utf-8') as file:
     file.write(str(soup))
 
-print(f"Страница успешно скачана и сохранена в файл {file_path}")
-
 # Шаг 2: Запуск локального сервера
-
-# Создаем копию soup для сохранения в index.html
-soup_copy = soup
-
-# Копируем содержимое файла в файл index.html в текущей рабочей директории
-with open('index.html', 'w', encoding='utf-8') as file:
-    file.write(str(soup_copy))
 
 # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
 local_server_command = 'python -m http.server 8000'
@@ -112,12 +93,10 @@ if not os.path.exists(image_dir):
 image_tags = soup.find_all('img', {'src': True})
 for idx, image_tag in enumerate(image_tags):
     image_url = image_tag['src']
-    image_response = requests.get(image_url)
     image_filename = os.path.join(image_dir, f'image_{idx+1}.png')
-    with open(image_filename, 'wb') as image_file:
-        image_file.write(image_response.content)
+    subprocess.run(['wget', '--no-clobber', '--quiet', '-P', image_dir, image_url])
 
-# Добавляем задержку, чтобы скрипт
+# Добавляем задержку, чтобы скрипт не завершался сразу
 try:
     while True:
         time.sleep(1)
