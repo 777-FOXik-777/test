@@ -106,9 +106,7 @@ serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.
 # Получаем public URL из вывода процесса Serveo
 serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
-print(f"Файл {file_to_tunnel} доступен по следующему public URL: {serveo_url}")
-
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+print(f"Файл доступен по следующему public URL: {serveo_url}")
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
