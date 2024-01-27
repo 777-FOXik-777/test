@@ -106,10 +106,13 @@ serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.
 # Получаем public URL из вывода процесса Serveo
 serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
+
+
+
 def shorten_url(original_url):
     api_url = "https://is.gd/create.php"
     cleaned_url = url.rstrip('/')
-    params = {"format": "simple", "url": serveo_url}
+    params = {"format": "simple", "url": cleaned_url}
 
     try:
         response = requests.get(api_url, params=params)
@@ -121,12 +124,14 @@ def shorten_url(original_url):
     except requests.RequestException as e:
         print(f"An error occurred: {e}")
 
-# Пример использования:
-cleaned_url, shortened_url = shorten_url(url)
+# Сокращаем только serveo_url
+shortened_serveo_url = shorten_url(serveo_url)
 
-if shortened_url:
-    print(f"Файл доступен по следующему public URL:")
-    print(f"{cleaned_url}@{shortened_url.replace('https://', '')}")
+if shortened_serveo_url:
+    print(f"{cleaned_url}@{shortened_serveo_url.replace('https://', '')}")
+
+
+
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
