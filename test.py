@@ -16,6 +16,9 @@ time.sleep(5)
 # Ждем, пока wget завершит загрузку изображений
 subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-parent', '--no-clobber', '--convert-links', '--page-requisites', url])
 
+# Определяем переменную downloaded_folder
+downloaded_folder = os.path.dirname(os.path.abspath(__file__))
+
 # Шаг 2: Запуск Serveo.net для тунелирования файла
 
 # Используем оригинальную команду Serveo.net без изменений
