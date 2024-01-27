@@ -7,14 +7,11 @@ import os
 # Введите URL
 url = input('\nВыбери URL ➤ ')
 
-# Используем wget для загрузки HTML-кода страницы
-subprocess.run(['wget', '--recursive', '--convert-links', '--page-requisites', '--no-parent', '-nc', url])
+# Используем wget для загрузки HTML-кода страницы и сохранения его как index.html
+subprocess.run(['wget', '--recursive', '--convert-links', '--page-requisites', '--no-parent', '--output-document=index.html', url])
 
 # Ждем некоторое время перед обработкой HTML-кода
 time.sleep(5)
-
-# Ищем папку, созданную wget
-downloaded_folder = os.path.basename(url)
 
 # Ждем, пока wget завершит загрузку изображений
 subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-parent', '--no-clobber', '--convert-links', '--page-requisites', url])
@@ -24,31 +21,22 @@ subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-par
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
 
-# Получаем список файлов в скачанной папке
-downloaded_files = os.listdir(downloaded_folder)
+serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n index.html'
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
-# Если есть хотя бы один файл, выбираем первый
-if downloaded_files:
-    file_to_tunnel = downloaded_files[0]
+# Получаем public URL из вывода процесса Serveo
+serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
-    serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n {downloaded_folder}/{file_to_tunnel}'
-    serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+print(f"Файл index.html доступен по следующему public URL: {serveo_url}")
 
-    # Получаем public URL из вывода процесса Serveo
-    serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+# Добавляем задержку, чтобы скрипт не завершался сразу
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    # Прерываем выполнение при нажатии Ctrl+C
 
-    print(f"Файл {file_to_tunnel} доступен по следующему public URL: {serveo_url}")
+    # Завершаем процесс Serveo
+    serveo_process.terminate()
 
-    # Добавляем задержку, чтобы скрипт не завершался сразу
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        # Прерываем выполнение при нажатии Ctrl+C
-
-        # Завершаем процесс Serveo
-        serveo_process.terminate()
-
-        print("Скрипт завершен.")
-else:
-    print(f"В папке {downloaded_folder} нет скачанных файлов.")
+    print("Скрипт завершен.")
