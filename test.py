@@ -21,11 +21,12 @@ print(f"Страница успешно скачана и сохранена в 
 
 # Шаг 2: Запуск локального сервера
 
-# Получаем текущую рабочую директорию
-current_directory = os.getcwd()
+# Копируем содержимое файла в файл index.html в текущей рабочей директории
+with open('index.html', 'w', encoding='utf-8') as file:
+    file.write(html_content)
 
 # Выполняем команду для запуска локального сервера на порту 8080
-local_server_command = f'python -m http.server --directory {current_directory} 8080'
+local_server_command = 'python -m http.server 8080'
 
 # Запускаем команду для локального сервера с помощью subprocess
 local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
