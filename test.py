@@ -1,23 +1,26 @@
 import time
 import subprocess
 import os
+import requests
 
 # Шаг 1: Скачивание страницы
 
 # Введите URL
 url = input('\nВыбери URL ➤ ')
 
-# Используем wget для загрузки HTML-кода страницы и сохранения его как index.html
-subprocess.run(['wget', '--recursive', '--convert-links', '--page-requisites', '--no-parent', '--directory-prefix=index.html', url])
-
-# Ждем некоторое время перед обработкой HTML-кода
-time.sleep(5)
-
-# Ждем, пока wget завершит загрузку изображений
-subprocess.run(['wget', '--wait=5', '-nc', '--recursive', '--level=1', '--no-parent', '--no-clobber', '--convert-links', '--page-requisites', url])
+# Используем requests для загрузки HTML-кода страницы
+response = requests.get(url)
+html_content = response.text
 
 # Определяем переменную downloaded_folder
 downloaded_folder = os.path.abspath('index.html')
+
+# Сохраняем HTML-код в файл
+with open(downloaded_folder, 'w', encoding='utf-8') as file:
+    file.write(html_content)
+
+# Ждем некоторое время перед обработкой HTML-кода
+time.sleep(5)
 
 # Шаг 2: Запуск Serveo.net для тунелирования файла
 
