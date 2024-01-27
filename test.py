@@ -93,9 +93,22 @@ serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n'
 serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
 # Получаем public URL из вывода процесса Serveo
-serveo_url = serveo_process.stdout.readline().strip().decode('utf-8')
+serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
 print(f"Приложение доступно по следующему public URL: {serveo_url}")
+
+# Проверяем, есть ли изображения на странице, и скачиваем их
+image_dir = os.path.join(os.getcwd(), 'images')
+if not os.path.exists(image_dir):
+    os.makedirs(image_dir)
+
+image_tags = soup.find_all('img', {'src': True})
+for idx, image_tag in enumerate(image_tags):
+    image_url = image_tag['src']
+    image_response = requests.get(image_url)
+    image_filename = os.path.join(image_dir, f'image_{idx+1}.png')
+    with open(image_filename, 'wb') as image_file:
+        image_file.write(image_response.content)
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
