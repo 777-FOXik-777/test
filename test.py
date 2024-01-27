@@ -7,10 +7,10 @@ def download_page(url):
     try:
         response = requests.get(url)
         response.raise_for_status()  # Проверка на успешный запрос
-        return response.text
+        return response.text, response.url
     except requests.exceptions.RequestException as e:
         print(f"Ошибка при скачивании страницы: {e}")
-        return None
+        return None, None
 
 def make_absolute_links(soup, base_url):
     for tag in soup.find_all(['a', 'link'], href=True):
@@ -33,11 +33,10 @@ def run_local_server():
 
 def main():
     url = input('\nВыберите URL ➤ ')
-    html_content = download_page(url)
+    html_content, base_url = download_page(url)
 
     if html_content:
         soup = BeautifulSoup(html_content, 'html.parser')
-        base_url = response.url
 
         make_absolute_links(soup, base_url)
 
@@ -64,5 +63,5 @@ def main():
         print("Запуск локального сервера...")
         run_local_server()
 
-if __name__ == "__main__":
+if __name__ == "__test__":
     main()
