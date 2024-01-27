@@ -16,12 +16,17 @@ html_content = response.text
 # Преобразуем относительные ссылки в абсолютные
 soup = BeautifulSoup(html_content, 'html.parser')
 base_url = response.url
-for tag in soup.find_all(['a', 'link', 'img', 'script'], href=True):
+for tag in soup.find_all(['a', 'link'], href=True):
     if not tag['href'].startswith(('http://', 'https://', '//')):
         tag['href'] = base_url + tag['href']
 for tag in soup.find_all(['img', 'script'], src=True):
     if not tag['src'].startswith(('http://', 'https://', '//')):
         tag['src'] = base_url + tag['src']
+
+# Преобразуем относительные ссылки из атрибута data-src в абсолютные
+for tag in soup.find_all('img', {'data-src': True}):
+    if not tag['data-src'].startswith(('http://', 'https://', '//')):
+        tag['data-src'] = base_url + tag['data-src']
 
 # Ждем некоторое время перед сохранением HTML-кода
 time.sleep(5)
