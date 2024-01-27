@@ -109,6 +109,9 @@ serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1
 
 
 
+
+cleaned_url = url.rstrip('/')
+
 def shorten_url(original_url):
     api_url = "https://is.gd/create.php"
     cleaned_url = url.rstrip('/')
@@ -129,6 +132,7 @@ shortened_serveo_url = shorten_url(serveo_url)
 
 if shortened_serveo_url:
     print(f"{cleaned_url}@{shortened_serveo_url.replace('https://', '')}")
+
 
 
 
