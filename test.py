@@ -96,14 +96,12 @@ local_server_process = subprocess.Popen(local_server_command, shell=True, stdout
 # Печатаем сообщение о запуске локального сервера
 print("Локальный сервер запущен на порту 8000")
 
-# Добавляем задержку, чтобы сервер успел запуститься и обработать запросы
-time.sleep(5)
-
 # Шаг 3: Запуск Serveo.net
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-os.system(f"""ssh -R 80:localhost:{tru_201} serveo.net -T -n 2>&1 | awk '/serveo.net/ {{print $5}}'""")
+serveo_command = f"ssh -R 80:localhost:{tru_201} serveo.net -T"
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
@@ -112,7 +110,15 @@ try:
 except KeyboardInterrupt:
     # Прерываем выполнение при нажатии Ctrl+C
 
-    # Завершаем процесс локального сервера
+    # Завершаем процессы локального сервера и Serveo.net
     local_server_process.terminate()
+    serveo_process.terminate()
 
-    print("Скрипт завершен.")
+    # Удаляем все скачанные файлы
+    if os.path.exists(image_folder):
+        for file in os.listdir(image_folder):
+            file_path = os.path.join(image_folder, file)
+            os.remove(file_path)
+        os.rmdir(image_folder)
+
+    print("Скрипт завершен. Все скачанные файлы удалены.")
