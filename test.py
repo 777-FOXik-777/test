@@ -45,8 +45,20 @@ local_server_process = subprocess.Popen(local_server_command, shell=True, stdout
 # Печатаем сообщение о запуске локального сервера
 print("Локальный сервер запущен на порту 8000")
 
-print("")
-os.system("""ssh -R 80:localhost:8080 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'""")
+# Шаг 3: Запуск Serveo.net
+
+# Добавляем задержку, чтобы сервер успел запуститься
+time.sleep(2)
+
+# Запускаем команду для Serveo.net с помощью subprocess
+serveo_command = """ssh -R 80:localhost:8000 serveo.net -T -n 2>&1 | awk '/serveo.net/ {print $5}'"""
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+
+# Получаем вывод команды (URL Serveo)
+serveo_output = serveo_process.stdout.read().decode('utf-8').strip()
+
+# Печатаем URL Serveo
+print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_output}")
 
 # Добавляем задержку, чтобы скрипт не завершался сразу
 try:
@@ -57,5 +69,8 @@ except KeyboardInterrupt:
 
     # Завершаем процесс локального сервера
     local_server_process.terminate()
+
+    # Завершаем процесс Serveo.net
+    serveo_process.terminate()
 
     print("Скрипт завершен.")
