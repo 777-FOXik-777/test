@@ -1,10 +1,11 @@
 import requests
 import subprocess
+import time
 
 # Шаг 1: Скачивание страницы
 
 # Замените 'http://example.com' на нужную вам ссылку
-url = 'https://www.olx.ua/uk/'
+url = 'https://www.olx.ua/uk'
 
 # Скачиваем страницу по ссылке
 response = requests.get(url)
@@ -25,23 +26,18 @@ serveo_subdomain = 'your-serveo-subdomain'
 serveo_command = f'ssh -R 80:localhost:8080 {serveo_subdomain}.serveo.net -T -n'
 
 # Запускаем команду для Serveo.net с помощью subprocess
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
-# Ждем, пока процесс не завершится
-serveo_output, serveo_error = serveo_process.communicate()
+# Получаем вывод команды (URL Serveo)
+serveo_output = serveo_process.stdout.read().decode('utf-8').strip()
 
 # Печатаем URL Serveo
-if not serveo_error:
-    serveo_url = serveo_output.decode('utf-8').strip()
-    print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_url}")
-else:
-    print(f"Ошибка при запуске на Serveo: {serveo_error.decode('utf-8')}")
+print(f"Ваша страница теперь доступна по ссылке Serveo: {serveo_output}")
 
-# Шаг 3: Запуск на локальном сервере
-
-# Если ваш локальный сервер уже запущен на порту 8080, его можно открыть в браузере напрямую:
-local_url = 'http://localhost:8080'
-print(f"Ваш локальный сервер доступен по ссылке: {local_url}")
-
-# Ждем, пока пользователь не закроет программу (или можно добавить какую-то логику завершения программы)
-input("Нажмите Enter для завершения программы...")
+# Добавляем задержку, чтобы скрипт не завершался сразу
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    # Прерываем выполнение при нажатии Ctrl+C
+    print("Скрипт завершен.")
