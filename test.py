@@ -18,22 +18,6 @@ html_content = response.text
 soup = BeautifulSoup(html_content, 'html.parser')
 base_url = response.url
 
-def shorten_url(original_url):
-    api_url = "https://is.gd/create.php"
-    cleaned_url = url.rstrip('/')
-    params = {"format": "simple", "url": serveo_url}
-
-    try:
-        response = requests.get(api_url, params=params)
-        if response.status_code == 200:
-            shortened_url = response.text.strip()
-            return cleaned_url, shortened_url
-        else:
-            print(f"Error {response.status_code}: {response.text}")
-    except requests.RequestException as e:
-        print(f"An error occurred: {e}")
-
-
 def make_absolute_links(tag, attribute):
     if not tag[attribute].startswith(('http://', 'https://', '//')):
         tag[attribute] = urljoin(base_url, tag[attribute])
@@ -116,30 +100,15 @@ print("Локальный сервер запущен на порту 8000")
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T 2>&1 | awk '/^\\[SERVEO\\]/{print $3}' > serveo_output.txt"
-
-# Запускаем команду для Serveo с помощью subprocess
-serveo_process = subprocess.Popen(serveo_command, shell=True)
-
-# Ожидаем, пока Serveo не выдаст public URL
-while True:
-    time.sleep(1)
-    with open('serveo_output.txt', 'r') as serveo_output_file:
-        serveo_output = serveo_output_file.read()
-        if serveo_output.strip() != "":
-            break
+serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
 # Получаем public URL из вывода процесса Serveo
-serveo_url = serveo_output.strip()
+serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
-# Пример использования:
-cleaned_url, shortened_url = shorten_url(url)
+print(f"Файл доступен по следующему public URL: {serveo_url}")
 
-if shortened_url:
-    print(f"Ваш url:")
-    print(f"{cleaned_url}@{shortened_url.replace('https://', '')}")
-
-# Прерываем выполнение при нажатии Ctrl+C
+# Добавляем задержку, чтобы скрипт не завершался сразу
 try:
     while True:
         time.sleep(1)
@@ -157,7 +126,6 @@ except KeyboardInterrupt:
             os.remove(file_path)
         os.rmdir(image_folder)
     
-    os.remove("index.html")
-    os.remove("downloaded_page.html")
-    os.remove("serveo_output.txt")
+    os.system("rm -fr index.html")
+    os.system("rm -fr downloaded_page.html")
     print("Скрипт завершен. Все скачанные файлы удалены.")
