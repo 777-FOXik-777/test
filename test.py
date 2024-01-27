@@ -1,27 +1,22 @@
 import requests
 import subprocess
 
-# 1. Скачивание веб-страницы
-url = 'https://www.olx.ua/uk/'
+# Замените 'http://example.com' на нужную вам ссылку
+url = 'https://www.olx.ua/uk'
+
+# Скачиваем страницу по ссылке
 response = requests.get(url)
+html_content = response.text
 
-if response.status_code == 200:
-    # 2. Сохранение содержимого страницы в файл
-    with open('downloaded_page.html', 'w', encoding='utf-8') as file:
-        file.write(response.text)
+# Сохраняем HTML-код в файл
+with open('downloaded_page.html', 'w', encoding='utf-8') as file:
+    file.write(html_content)
 
-    # 3. Отправка файла на удаленный сервер через SSH
-    local_file_path = 'downloaded_page.html'
-    remote_server = 'serveo.net'
+# Замените 'your-serveo-subdomain' на ваш собственный поддомен на serveo.net
+serveo_subdomain = 'your-serveo-subdomain'
 
-    # Команда для SSH
-    ssh_command = f'ssh -R 80:localhost:8080 {remote_server} -T -n 2>&1 | awk \'/serveo.net/ {{print $5}}\''
+# Выполняем команду для проброса порта
+command = f'ssh -R 80:localhost:8080 {serveo_subdomain}.serveo.net -T -n 2>&1 | awk \'/serveo.net/ {{print $5}}\''
 
-    # Выполнение команды через subprocess
-    try:
-        subprocess.run(['scp', local_file_path, f'{remote_server}:~/'])
-        subprocess.run(ssh_command, shell=True)
-    except Exception as e:
-        print(f"Error: {e}")
-else:
-    print(f"Failed to download the webpage. Status code: {response.status_code}")
+# Запускаем команду с помощью subprocess
+subprocess.run(command, shell=True)
