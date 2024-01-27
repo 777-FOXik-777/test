@@ -34,7 +34,7 @@ time.sleep(5)
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n'
+serveo_command = f'ssh -R 80:localhost:{tru_201} serveo.net -T -n index.html'
 serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
 # Получаем public URL из вывода процесса Serveo
