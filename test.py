@@ -37,14 +37,14 @@ time.sleep(5)
 # Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
 script = """
 <script>
-    window.onload = function() {
+    setTimeout(function() {
         var lazyImages = document.querySelectorAll('img[data-src]');
         lazyImages.forEach(function(img) {
             if (img.hasAttribute('data-src')) {
                 img.setAttribute('src', img.getAttribute('data-src'));
             }
         });
-    };
+    }, 5000);
 </script>
 """
 
@@ -110,15 +110,4 @@ for idx, image_tag in enumerate(image_tags):
     with open(image_filename, 'wb') as image_file:
         image_file.write(image_response.content)
 
-# Добавляем задержку, чтобы скрипт не завершался сразу
-try:
-    while True:
-        time.sleep(1)
-except KeyboardInterrupt:
-    # Прерываем выполнение при нажатии Ctrl+C
-
-    # Завершаем процессы локального сервера и Serveo
-    local_server_process.terminate()
-    serveo_process.terminate()
-
-    print("Скрипт завершен.")
+# Добавляем задержку, чтобы скрипт
