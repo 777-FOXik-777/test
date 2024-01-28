@@ -19,9 +19,8 @@ soup = BeautifulSoup(html_content, 'html.parser')
 base_url = response.url
 
 def make_absolute_links(tag, attribute):
-    if attribute in tag.attrs:
-        if not tag[attribute].startswith(('http://', 'https://', '//')):
-            tag[attribute] = urljoin(base_url, tag[attribute])
+    if not tag[attribute].startswith(('http://', 'https://', '//')):
+        tag[attribute] = urljoin(base_url, tag[attribute])
 
 # Преобразуем относительные ссылки
 for tag in soup.find_all(['a', 'link'], href=True):
@@ -59,19 +58,18 @@ image_paths = []
 image_tags = soup.find_all('img')
 for img_tag in image_tags:
     make_absolute_links(img_tag, 'src')
-    if 'src' in img_tag.attrs:
-        image_url = img_tag['src']
-        image_name = os.path.basename(urlparse(image_url).path)
-        image_path = os.path.join(image_folder, image_name)
-        
-        try:
-            image_content = requests.get(image_url).content
-            with open(image_path, 'wb') as image_file:
-                image_file.write(image_content)
-            print(f"Изображение сохранено: {image_path}")
-            image_paths.append(image_path)
-        except Exception as e:
-            print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+    image_url = img_tag['src']
+    image_name = os.path.basename(urlparse(image_url).path)
+    image_path = os.path.join(image_folder, image_name)
+
+    try:
+        image_content = requests.get(image_url).content
+        with open(image_path, 'wb') as image_file:
+            image_file.write(image_content)
+        print(f"Изображение сохранено: {image_path}")
+        image_paths.append(image_path)
+    except Exception as e:
+        print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
 
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
@@ -102,11 +100,11 @@ print("Локальный сервер запущен на порту 8000")
 
 # Используем оригинальную команду Serveo.net без изменений
 tru_201 = '8000'  # Замените на нужный вам порт
-serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
-serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T -n 2>&1 | awk '/serveo.net/ {{print $5}}' > serveo_logs.txt"
+serveo_address = subprocess.check_output(serveo_command, shell=True, text=True).strip()
 
-# Получаем public URL из вывода процесса Serveo
-serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+# Получаем public URL из вывода команды Serveo
+serveo_url = f"http://{serveo_address}"
 
 print(f"Файл доступен по следующему public URL: {serveo_url}")
 
@@ -119,7 +117,13 @@ except KeyboardInterrupt:
 
     # Завершаем процессы локального сервера и Serveo.net
     local_server_process.terminate()
-    serveo_process.terminate()
+    os.system(f"pkill -f 'ssh -q -R 80:localhost:{tru_201} serveo.net -T'")  # Завершаем процесс Serveo.net
+
+    # Выводим содержимое логов
+    with open('serveo_logs.txt', 'r') as logs_file:
+        logs_content = logs_file.read()
+        print("Логи Serveo.net:")
+        print(logs_content)
 
     # Удаляем все скачанные файлы
     if os.path.exists(image_folder):
@@ -127,7 +131,8 @@ except KeyboardInterrupt:
             file_path = os.path.join(image_folder, file)
             os.remove(file_path)
         os.rmdir(image_folder)
-    
-    os.remove("index.html")
-    os.remove("downloaded_page.html")
+
+    os.remove('index.html')
+    os.remove('downloaded_page.html')
+    os.remove('serveo_logs.txt')
     print("Скрипт завершен. Все скачанные файлы удалены.")
