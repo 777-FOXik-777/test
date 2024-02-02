@@ -23,13 +23,14 @@ else:
 
 
 # Задайте URL-адрес и параметры запроса
-url = "https://graph.facebook.com/v14.0/me/messages"
+url = "https://zoom.us/api/v2/meetings/{}/send_sms".format(meeting_id)
 params = {
-    "phone": phone_number,
+    "phone_number": phone_number,
+    "message": "Ваш SMS-код: 123456",
 }
 
 # Отправьте запрос и получите ответ
-response = requests.get(url, params=params)
+response = requests.post(url, params=params)
 
 # Проверьте код ответа
 if response.status_code == 200:
@@ -38,5 +39,3 @@ if response.status_code == 200:
 else:
     # Произошла ошибка
     print("Ошибка:", response.status_code)
-
-
