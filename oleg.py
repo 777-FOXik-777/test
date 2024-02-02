@@ -1,12 +1,22 @@
 import requests
 
-def send_sms_request(phone_number):
-    url = "http://my.telegram.org/auth/send_code"
-    data = {"phone": phone_number}
-    response = requests.post(url, data=data)
-    return response
+# Введите номер телефона
+phone_number = "79031234567"
 
-if __name__ == "__main__":
-    phone_number = "380638966197"
-    response = send_sms_request(phone_number)
-    print(response)
+# Задайте URL-адрес и параметры запроса
+url = "https://my.telegram.org/auth/send_password"
+params = {
+    "phone": phone_number,
+}
+
+# Отправьте запрос и получите ответ
+response = requests.get(url, params=params)
+
+# Проверьте код ответа
+if response.status_code == 200:
+    # SMS-код отправлен на указанный номер телефона
+    print("SMS-код отправлен на номер", phone_number)
+else:
+    # Произошла ошибка
+    print("Ошибка:", response.status_code)
+
