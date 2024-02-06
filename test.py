@@ -102,18 +102,18 @@ if url.strip():
     with open('index.html', 'w', encoding='utf-8') as file:
         file.write(str(soup_copy.prettify()))
 
-    # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
+    # Запускаем локальный сервер на порту 8000 (или другом свободном порту)
     local_server_command = 'python -m http.server 8000'
 
-    # Запускаем команду для локального сервера с помощью subprocess
+    # Запускаем локальный сервер с помощью subprocess
     local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
 
     # Печатаем сообщение о запуске локального сервера
     print("Локальный сервер запущен на порту 8000")
 
-    # Шаг 3: Запуск Serveo.net
-    print("Чтобы увидеть ваш ввод на локальном сервере, перейдите по следующему URL:")
-    print(f"http://localhost:8000/?{url}")
+    # Отображаем IP-адрес того, кто зашел на локальный сервер
+    local_ip_address = requests.get('https://api.ipify.org').text
+    print(f"IP-адрес того, кто зашел на локальный сервер: {local_ip_address}")
 
     # Добавляем задержку, чтобы скрипт не завершался сразу
     try:
