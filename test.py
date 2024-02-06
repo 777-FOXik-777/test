@@ -4,6 +4,7 @@ import time
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
+import socket
 
 # Введите URL
 url = input('\nВыбери URL ➤ ')
@@ -50,18 +51,6 @@ if url.strip():
     # Вставляем скрипт в конец HTML-страницы
     soup.body.append(BeautifulSoup(script, 'html.parser'))
 
-    # Добавляем текстовое поле для отображения ввода пользователя
-    input_display_script = """
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var userInputDisplay = document.createElement('div');
-            userInputDisplay.innerHTML = "<h2>Вы ввели: " + decodeURIComponent(location.search.slice(1)) + "</h2>";
-            document.body.appendChild(userInputDisplay);
-        });
-    </script>
-    """
-    soup.body.append(BeautifulSoup(input_display_script, 'html.parser'))
-
     # Проверяем наличие изображений на странице и сохраняем их
     image_folder = 'images'
     os.makedirs(image_folder, exist_ok=True)
@@ -102,18 +91,30 @@ if url.strip():
     with open('index.html', 'w', encoding='utf-8') as file:
         file.write(str(soup_copy.prettify()))
 
-    # Запускаем локальный сервер на порту 8000 (или другом свободном порту)
+    # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
     local_server_command = 'python -m http.server 8000'
 
-    # Запускаем локальный сервер с помощью subprocess
+    # Запускаем команду для локального сервера с помощью subprocess
     local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
 
     # Печатаем сообщение о запуске локального сервера
     print("Локальный сервер запущен на порту 8000")
 
-    # Отображаем IP-адрес того, кто зашел на локальный сервер
-    local_ip_address = requests.get('https://api.ipify.org').text
-    print(f"IP-адрес того, кто зашел на локальный сервер: {local_ip_address}")
+    # Получаем IP-адрес клиента
+    client_ip = socket.gethostbyname(socket.gethostname())
+    print(f"IP клиента: {client_ip}")
+
+    # Шаг 3: Запуск Serveo.net
+
+    # Используем оригинальную команду Serveo.net без изменений
+    tru_201 = '8000'  # Замените на нужный вам порт
+    serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
+    serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+
+    # Получаем public URL из вывода процесса Serveo
+    serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+
+    print(f"Файл доступен по следующему public URL: {serveo_url}")
 
     # Добавляем задержку, чтобы скрипт не завершался сразу
     try:
@@ -122,8 +123,9 @@ if url.strip():
     except KeyboardInterrupt:
         # Прерываем выполнение при нажатии Ctrl+C
 
-        # Завершаем процессы локального сервера
+        # Завершаем процессы локального сервера и Serveo.net
         local_server_process.terminate()
+        serveo_process.terminate()
 
         # Удаляем все скачанные файлы
         if os.path.exists(image_folder):
