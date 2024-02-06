@@ -4,9 +4,6 @@ import time
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
-from flask import Flask, request
-
-app = Flask(__name__)
 
 # Шаг 1: Скачивание страницы
 
@@ -60,19 +57,22 @@ os.makedirs(image_folder, exist_ok=True)
 image_paths = []
 image_tags = soup.find_all('img')
 for img_tag in image_tags:
-    make_absolute_links(img_tag, 'src')
-    image_url = img_tag['src']
-    image_name = os.path.basename(urlparse(image_url).path)
-    image_path = os.path.join(image_folder, image_name)
-    
-    try:
-        image_content = requests.get(image_url).content
-        with open(image_path, 'wb') as image_file:
-            image_file.write(image_content)
-        print(f"Изображение сохранено: {image_path}")
-        image_paths.append(image_path)
-    except Exception as e:
-        print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+    if 'src' in img_tag.attrs:  # Проверяем наличие атрибута 'src'
+        make_absolute_links(img_tag, 'src')
+        image_url = img_tag['src']
+        image_name = os.path.basename(urlparse(image_url).path)
+        image_path = os.path.join(image_folder, image_name)
+        
+        try:
+            image_content = requests.get(image_url).content
+            with open(image_path, 'wb') as image_file:
+                image_file.write(image_content)
+            print(f"Изображение сохранено: {image_path}")
+            image_paths.append(image_path)
+        except Exception as e:
+            print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+    else:
+        print("Тег изображения не содержит атрибута 'src'.")
 
 # Сохраняем HTML-код в файл
 file_path = 'downloaded_page.html'
@@ -90,17 +90,19 @@ soup_copy = soup
 with open('index.html', 'w', encoding='utf-8') as file:
     file.write(str(soup_copy.prettify()))
 
-# Выполняем команду для запуска локального сервера на порту 8001 (или другом свободном порту)
-local_server_command = 'python -m http.server 8001'  # Используем другой порт для локального сервера
+# Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
+local_server_command = 'python -m http.server 8000'
+
+# Запускаем команду для локального сервера с помощью subprocess
 local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
 
 # Печатаем сообщение о запуске локального сервера
-print("Локальный сервер запущен на порту 8001")
+print("Локальный сервер запущен на порту 8000")
 
 # Шаг 3: Запуск Serveo.net
 
 # Используем оригинальную команду Serveo.net без изменений
-tru_201 = '8001'  # Замените на нужный вам порт
+tru_201 = '8000'  # Замените на нужный вам порт
 serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
 serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
