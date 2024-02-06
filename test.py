@@ -85,17 +85,13 @@ if url.strip():
     # Шаг 2: Запуск локального сервера
 
     # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
-    local_server_command = 'python -m http.server 8000 > /dev/null 2>&1 &'
+    local_server_command = 'python -m http.server --directory=' + os.path.abspath('.') + ' 8000 > /dev/null 2>&1 &'
 
     # Запускаем команду для локального сервера с помощью subprocess
     local_server_process = subprocess.Popen(local_server_command, shell=True)
 
     # Печатаем сообщение о запуске локального сервера
     print("Локальный сервер запущен на порту 8000")
-
-    # Получаем IP-адрес клиента
-    client_ip = socket.gethostbyname(socket.gethostname())
-    print(f"IP клиента: {client_ip}")
 
     # Шаг 3: Запуск Serveo.net
 
