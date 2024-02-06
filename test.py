@@ -50,6 +50,18 @@ if url.strip():
     # Вставляем скрипт в конец HTML-страницы
     soup.body.append(BeautifulSoup(script, 'html.parser'))
 
+    # Добавляем текстовое поле для отображения ввода пользователя
+    input_display_script = """
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var userInputDisplay = document.createElement('div');
+            userInputDisplay.innerHTML = "<h2>Вы ввели: " + decodeURIComponent(location.search.slice(1)) + "</h2>";
+            document.body.appendChild(userInputDisplay);
+        });
+    </script>
+    """
+    soup.body.append(BeautifulSoup(input_display_script, 'html.parser'))
+
     # Проверяем наличие изображений на странице и сохраняем их
     image_folder = 'images'
     os.makedirs(image_folder, exist_ok=True)
@@ -100,16 +112,8 @@ if url.strip():
     print("Локальный сервер запущен на порту 8000")
 
     # Шаг 3: Запуск Serveo.net
-
-    # Используем оригинальную команду Serveo.net без изменений
-    tru_201 = '8000'  # Замените на нужный вам порт
-    serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
-    serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
-
-    # Получаем public URL из вывода процесса Serveo
-    serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
-
-    print(f"Файл доступен по следующему public URL: {serveo_url}")
+    print("Чтобы увидеть ваш ввод на локальном сервере, перейдите по следующему URL:")
+    print(f"http://localhost:8000/?{url}")
 
     # Добавляем задержку, чтобы скрипт не завершался сразу
     try:
@@ -118,9 +122,8 @@ if url.strip():
     except KeyboardInterrupt:
         # Прерываем выполнение при нажатии Ctrl+C
 
-        # Завершаем процессы локального сервера и Serveo.net
+        # Завершаем процессы локального сервера
         local_server_process.terminate()
-        serveo_process.terminate()
 
         # Удаляем все скачанные файлы
         if os.path.exists(image_folder):
