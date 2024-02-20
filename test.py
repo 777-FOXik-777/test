@@ -6,6 +6,7 @@ import random
 import string
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
+import validators
 
 # Генерация случайной строки для заполнения полей ввода
 def random_string(length=10):
@@ -16,8 +17,8 @@ try:
     # Введите URL
     url = input('\nВыбери URL ➤ ')
 
-    # Проверяем, что URL не пустой
-    if url.strip():
+    # Проверяем, что URL не пустой и является корректным URL
+    if url.strip() and validators.url(url):
         # Скачиваем страницу по ссылке
         response = requests.get(url)
         html_content = response.text
@@ -89,18 +90,10 @@ try:
             local_server_process.terminate()
             serveo_process.terminate()
 
-            # Удаляем все скачанные файлы
-            if os.path.exists(image_folder):
-                for file in os.listdir(image_folder):
-                    file_path = os.path.join(image_folder, file)
-                    os.remove(file_path)
-                os.rmdir(image_folder)
+            print("Скрипт завершен.")
 
-            os.system("rm -fr index.html")
-            os.system("rm -fr downloaded_page.html")
-            print("Скрипт завершен. Все скачанные файлы удалены.")
     else:
-        print("Пустой URL. Пожалуйста, введите действительный URL.")
+        print("Некорректный URL. Пожалуйста, введите действительный URL.")
 
 except Exception as e:
     print(f"Произошла ошибка: {str(e)}")
