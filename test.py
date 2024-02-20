@@ -5,6 +5,11 @@ import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
 
+# Генерация случайной строки для заполнения полей ввода
+def random_string(length=10):
+    letters = string.ascii_letters
+    return ''.join(random.choice(letters) for i in range(length))
+
 # Введите URL
 url = input('\nВыбери URL ➤ ')
 
@@ -32,81 +37,31 @@ if url.strip():
     for tag in soup.find_all('img', {'data-src': True}):
         make_absolute_links(tag, 'data-src')
 
-    # Ждем некоторое время перед сохранением HTML-кода
-    time.sleep(5)
+    # Находим все формы на странице
+    forms = soup.find_all('form')
 
-    # Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
-    script = """
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var lazyImages = document.querySelectorAll('img[data-src]');
-            lazyImages.forEach(function(img) {
-                img.setAttribute('src', img.getAttribute('data-src'));
-            });
-        });
-    </script>
-    """
+    # Перебираем формы
+    for form in forms:
+        # Находим все поля ввода в форме
+        input_fields = form.find_all('input')
+        # Заполняем поля ввода случайными данными и выводим их
+        for input_field in input_fields:
+            if input_field.get('name'):  # Проверяем наличие атрибута 'name'
+                field_name = input_field['name']
+                field_value = random_string()
+                print(f"Введенные данные для поля '{field_name}': {field_value}")
 
-    # Вставляем скрипт в конец HTML-страницы
-    soup.body.append(BeautifulSoup(script, 'html.parser'))
-
-    # Проверяем наличие изображений на странице и сохраняем их
-    image_folder = 'images'
-    os.makedirs(image_folder, exist_ok=True)
-
-    image_paths = []
-    image_tags = soup.find_all('img')
-    for img_tag in image_tags:
-        if 'src' in img_tag.attrs:  # Проверяем наличие атрибута 'src'
-            make_absolute_links(img_tag, 'src')
-            image_url = img_tag['src']
-            image_name = os.path.basename(urlparse(image_url).path)
-            image_path = os.path.join(image_folder, image_name)
-
-            try:
-                image_content = requests.get(image_url).content
-                with open(image_path, 'wb') as image_file:
-                    image_file.write(image_content)
-                print(f"Изображение сохранено: {image_path}")
-                image_paths.append(image_path)
-            except Exception as e:
-                print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
-        else:
-            print("Тег изображения не содержит атрибута 'src'.")
-
-    # Сохраняем HTML-код в файл
-    file_path = 'downloaded_page.html'
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
-
-    print(f"Страница успешно скачана и сохранена в файл {file_path}")
-
-    # Шаг 2: Запуск локального сервера
-
-    # Создаем копию soup для сохранения в index.html
-    soup_copy = soup
-
-    # Копируем содержимое файла в файл index.html в текущей рабочей директории
-    with open('index.html', 'w', encoding='utf-8') as file:
-        file.write(str(soup_copy.prettify()))
-
-    # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
+    # Запуск локального сервера
     local_server_command = 'python -m http.server 8000'
-
-    # Запускаем команду для локального сервера с помощью subprocess
     local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
-
-    # Печатаем сообщение о запуске локального сервера
     print("Локальный сервер запущен на порту 8000")
 
-    # Шаг 3: Запуск Serveo.net
-
-    # Используем оригинальную команду Serveo.net без изменений
+    # Запуск Serveo.net
     tru_201 = '8000'  # Замените на нужный вам порт
     serveo_command = f"ssh -q -R 80:localhost:{tru_201} serveo.net -T"
     serveo_process = subprocess.Popen(serveo_command, shell=True, stdout=subprocess.PIPE)
 
-    # Получаем public URL из вывода процесса Serveo
+    # Получение public URL из вывода процесса Serveo
     serveo_url = serveo_process.stdout.readline().strip().decode('utf-8').split()[-1]
 
     print(f"Файл доступен по следующему public URL: {serveo_url}")
