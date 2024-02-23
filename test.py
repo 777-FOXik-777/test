@@ -134,4 +134,6 @@ if url.strip():
         # Удаляем все скачанные файлы
         os.system("rm -fr index.html")
         os.system("rm -fr downloaded_page.html")
-        print("Скрипт завершен. Все
+        print("Скрипт завершен. Все скачанные файлы удалены.")
+else:
+    print("Пустой URL. Пожалуйста, введите действительный URL.")
